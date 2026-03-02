@@ -6,12 +6,12 @@ const Home = () => {
   return (
     <div className="min-h-[calc(100vh-52px)] lg:h-[calc(100vh-52px)] bg-gray-50 dark:bg-gray-950 flex flex-col overflow-y-auto lg:overflow-hidden transition-colors duration-300">
 
-      {/* Main Content - Split Layout */}
+      {/* Hero Section */}
       <section className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8 lg:py-3 w-full">
         <div className="max-w-7xl mx-auto w-full">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             
-            {/* LEFT SIDE - Text Content */}
+            {/* Text Content */}
             <div className="space-y-6 lg:space-y-4 text-center lg:text-left order-2 lg:order-1">
               {/* Main Heading */}
               <div>
@@ -66,7 +66,7 @@ const Home = () => {
               </div>
             </div>
 
-            {/* RIGHT SIDE - URL Shortener */}
+            {/* URL Shortener Form */}
             <div className="w-full order-1 lg:order-2 mb-8 lg:mb-0">
               <FreeUrlShortener />
             </div>

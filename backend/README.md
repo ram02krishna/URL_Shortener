@@ -15,15 +15,14 @@ This directory contains the backend for the Shortify URL shortener application. 
 
 ## Features
 
-- **Free Tier URL Shortening**: Allow users to shorten 3 URLs without authentication.
-- **Device Tracking**: Track free tier usage per device using device fingerprinting.
-- **User Authentication**: Secure signup and login with JWT.
-- **URL Management**: Create, retrieve, and delete shortened URLs (authenticated users only).
-- **Redirection**: Handles redirection from short URLs to their original target.
-- **Rate Limiting**: Built-in protection against abuse with configurable rate limits.
-- **Database**: Uses PostgreSQL with Drizzle ORM for database management.
+- **RESTful API**: Clean, structured endpoints for user and URL management.
+- **JWT Authentication**: Secure, stateless user sessions using HTTP headers.
+- **Database ORM Integration**: Type-safe queries using Drizzle ORM and PostgreSQL.
+- **Device Validations**: Validates incoming `deviceId` hashes for free tier limits.
+- **Middleware Protections**: Employs `express-rate-limit` for DDoS prevention and abuse tracking.
+- **Serverless Ready**: Pre-configured to deploy seamlessly on Vercel as serverless functions.
 
-## Technologies Used
+## Backend Architecture
 
 - **Framework**: Node.js, Express.js
 - **Database**: PostgreSQL
@@ -199,32 +198,17 @@ When a rate limit is exceeded, the API returns a `429 Too Many Requests` respons
 
 The server will be available at `http://localhost:8000`.
 
-## Free Tier Implementation
+## Free Tier (Backend Architecture)
 
-The backend supports a free tier system that allows users to shorten URLs without authentication:
+The backend exposes a specific endpoint (`/shorten-free`) that bypasses standard JWT authentication but requires a valid `deviceId` payload.
 
-### How It Works
+### Backend Validation Flow:
+1. **Public Endpoint**: `/shorten-free` accepts requests without Authorization headers.
+2. **Schema Validation**: Requires a valid URL and a `deviceId` string.
+3. **Database Insertion**: URLs are saved with `deviceId` populated and `userId` set to `null`.
+4. **Rate Enforcement**: Shortening is strictly throttled to 30 requests per minute per IP via Express middleware.
 
-1. **Device Identification**: Frontend sends a unique `deviceId` generated using browser fingerprinting
-2. **Public Endpoint**: `/shorten-free` accepts requests without JWT authentication
-3. **Database Tracking**: URLs created via free tier are stored with `deviceId` instead of `userId`
-4. **Rate Limiting**: Free shortening has a 30 requests per minute limit per IP
-5. **Client-Side Limit**: Frontend enforces 3 shortens per device (stored in localStorage)
-
-### Database Changes
-
-The `urls` table schema was updated to support both authenticated and free tier URLs:
-- `userId`: Optional (null for free tier URLs)
-- `deviceId`: Optional (populated for free tier URLs)
-- At least one of `userId` or `deviceId` must be present
-
-### Frontend Integration
-
-- Device ID is generated once and stored in `localStorage`
-- Free use counter is incremented in `localStorage` and persists indefinitely
-- After 3 uses, frontend prompts user to sign up/login
-
----
+*Note: The actual count limitation (e.g., maximum 3 free URLs) is enforced by the client-side local storage logic. The backend's primary job is to ensure the payload is correctly structured and to protect the endpoint from rapid automation abuse via IP rate limiting.*
 
 ## Error Handling
 
@@ -268,3 +252,19 @@ The database schema is defined with Drizzle ORM and consists of two main tables:
 | `shortCode` | `varchar` | Unique                    |
 | `targetURL` | `varchar` |                           |
 | `userId`    | `uuid`    | Foreign Key to `users.id` |
+
+---
+
+## Vercel Deployment
+
+This backend is pre-configured to be deployed natively as Serverless Functions on Vercel.
+
+### Steps to Deploy
+1. Import the `backend` folder into Vercel.
+2. Vercel will process the included `vercel.json`, treating `index.js` as the serverless entry point.
+3. Add the following **Environment Variables** in your Vercel Project Settings:
+   - `DATABASE_URL`: Your production Postgres database connection string.
+   - `JWT_SECRET`: A secure random string for user authentication.
+   - `CORS_ORIGIN`: Your deployed frontend's URL (e.g., `https://your-frontend.vercel.app`).
+
+Once deployed, the backend handles short code resolution and QR redirects perfectly without additional configuration.

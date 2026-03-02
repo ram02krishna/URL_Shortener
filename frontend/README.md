@@ -15,15 +15,12 @@ This directory contains the frontend for the Shortify URL shortener application.
 
 ## Features
 
-- **Free Tier**: Try 3 free URL shortens without signup or login required!
-- **Device-Based Tracking**: Your free uses are tracked per device and persist forever.
-- **User Authentication**: Seamless sign-up and log-in experience.
-- **URL Shortening**: An intuitive interface for creating short URLs.
-- **Dashboard**: A comprehensive dashboard to manage all your shortened URLs.
-- **Theme Switcher**: Toggle between light, dark, and system themes.
-- **Responsive Design**: A clean, mobile-first design that adapts to any screen size.
-- **Toast Notifications**: User-friendly feedback for important actions and errors.
-- **Rate Limit Handling**: Graceful error handling for API rate limiting.
+- **Responsive Single Page Application**: Built with React and Vite for lightning-fast HMR and seamless client-side routing.
+- **Client-Side Device Tracking**: Generates and stores persistent browser fingerprints in `localStorage` to track free tier usage locally.
+- **Theme Management**: Employs React Context to smoothly toggle Dark/Light modes via Tailwind CSS classes.
+- **QR Code Generation**: Instantly renders downloadable SVG/PNG QR codes for generated URLs.
+- **Protected Routes**: Utilizes React Router DOM to block unauthorized access to dashboard components.
+- **UI/UX Polish**: Features Lucide icons, Framer Motion transitions, and React Hot Toast for non-blocking notifications.
 
 ## Tech Stack
 
@@ -123,13 +120,9 @@ Shortify offers a **free tier** that allows anyone to try the app without signin
 4. The count persists indefinitely unless user clears browser data
 5. After signup/login, users get unlimited shortens
 
-### Rate Limiting
+### Client-Side Rate Limit Handling
 
-The backend implements rate limiting to prevent abuse:
-- **Login/Signup**: Limited to 5 attempts per 15 minutes per IP
-- **URL Shortening**: Limited to 30 requests per minute per IP
-
-If you exceed these limits, you will receive a `429 Too Many Requests` error with a toast notification. Wait for the rate limit window to reset before retrying.
+When the backend API returns a `429 Too Many Requests` status, Axios interceptors and individual catch blocks instantly trigger a React Hot Toast notification. This provides immediate visual feedback to the user to wait before attempting another action.
 
 ### Environment Configuration
 
@@ -229,3 +222,16 @@ api.interceptors.request.use((config) => {
 - localStorage should store theme preference
 - Check `localStorage.getItem('theme')` in console
 - Theme preference is stored per browser/device
+
+---
+
+## Vercel Deployment
+
+This Vite/React application is fully configured for Vercel deployment. 
+
+### Steps to Deploy
+1. Import the `frontend` folder into a new Vercel project.
+2. Vercel will automatically configure the build settings for Vite.
+3. The included `vercel.json` ensures that all routes redirect to `index.html`, which natively prevents "404 Not Found" errors on refresh (a common issue in SPAs).
+4. Add the following **Environment Variable** in your Vercel Project Settings:
+   - `VITE_BACKEND_URL`: The URL of your deployed backend (e.g., `https://your-backend.vercel.app`). This is essential because the frontend uses this URL to craft QR codes and redirection links.

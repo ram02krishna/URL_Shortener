@@ -27,9 +27,11 @@
     "drizzle-orm": "^0.45.1",
     "express": "^5.2.1",
     "express-rate-limit": "^7.1.5",
+    "geoip-lite": "^2.0.0",
     "jsonwebtoken": "^9.0.3",
     "nanoid": "^5.1.6",
     "pg": "^8.16.3",
+    "ua-parser-js": "^2.0.9",
     "zod": "^4.1.13"
   }
 }

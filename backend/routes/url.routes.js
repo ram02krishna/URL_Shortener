@@ -6,10 +6,12 @@ import { ensureAuthenticated } from "../middlewares/auth.middleware.js";
 import { and, eq } from "drizzle-orm";
 
 import { createShortUrl } from "../services/url.service.js";
+import { logClick } from "../services/click.service.js";
+import { getUrlAnalytics } from "../services/analytics.service.js";
 
 const router = express.Router();
 
-// PUBLIC ENDPOINT: Shorten URL without authentication (free tier)
+// Shorten URL without authentication (free tier)
 router.post("/shorten-free", async function (req, res) {
   try {
     if (!req.body) {
@@ -38,6 +40,7 @@ router.post("/shorten-free", async function (req, res) {
       id: result.id,
       shortCode: result.shortCode,
       targetURL: result.targetURL,
+      expiresAt: result.expiresAt,
     });
   } catch (error) {
     console.error(error);
@@ -47,7 +50,7 @@ router.post("/shorten-free", async function (req, res) {
   }
 });
 
-// AUTHENTICATED ENDPOINT: Shorten URL with authentication
+// Shorten URL with authentication
 router.post("/shorten", ensureAuthenticated, async function (req, res) {
   try {
     if (!req.body) {
@@ -72,6 +75,7 @@ router.post("/shorten", ensureAuthenticated, async function (req, res) {
       id: result.id,
       shortCode: result.shortCode,
       targetURL: result.targetURL,
+      expiresAt: result.expiresAt,
     });
   } catch (error) {
     console.error(error);
@@ -97,6 +101,30 @@ router.get("/codes", ensureAuthenticated, async function (req, res) {
   }
 });
 
+// Get analytics for a URL the user owns
+router.get("/:id/analytics", ensureAuthenticated, async function (req, res) {
+  try {
+    const { id } = req.params;
+
+    // Verify the URL belongs to this user
+    const [url] = await db
+      .select({ id: urlsTable.id })
+      .from(urlsTable)
+      .where(and(eq(urlsTable.id, id), eq(urlsTable.userId, req.user.id)));
+
+    if (!url) {
+      return res.status(404).json({ error: "URL not found" });
+    }
+
+    const analytics = await getUrlAnalytics(id);
+
+    return res.json(analytics);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 router.delete("/:id", ensureAuthenticated, async function (req, res) {
   try {
     const id = req.params.id;
@@ -113,11 +141,12 @@ router.delete("/:id", ensureAuthenticated, async function (req, res) {
   }
 });
 
+// Resolve short code and redirect
 router.get("/:shortCode", async function (req, res) {
   try {
     const code = req.params.shortCode;
     const [result] = await db
-      .select({ targetURL: urlsTable.targetURL, expiresAt: urlsTable.expiresAt })
+      .select({ id: urlsTable.id, targetURL: urlsTable.targetURL, expiresAt: urlsTable.expiresAt })
       .from(urlsTable)
       .where(eq(urlsTable.shortCode, code));
 
@@ -131,6 +160,13 @@ router.get("/:shortCode", async function (req, res) {
         error: "This link has expired and is no longer available.",
       });
     }
+
+    // Fire-and-forget click logging (never delays the redirect)
+    const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim()
+            ?? req.socket.remoteAddress
+            ?? "Unknown";
+    const ua = req.headers["user-agent"] ?? "";
+    logClick({ urlId: result.id, ip, ua });
 
     return res.redirect(result.targetURL);
   } catch (error) {

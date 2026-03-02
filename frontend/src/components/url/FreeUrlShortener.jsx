@@ -96,7 +96,7 @@ const FreeUrlShortener = () => {
           )}
         </div>
 
-        {/* Form or Result */}
+        {/* Form */}
         {!shortUrl ? (
           <form onSubmit={submit} className="space-y-4">
             <div className="flex flex-col sm:flex-row gap-3">
@@ -199,7 +199,7 @@ const FreeUrlShortener = () => {
           </div>
         )}
 
-        {/* Sign up prompt when out of uses */}
+        {/* Out of Uses Prompt */}
         {remainingUses === 0 && !shortUrl && (
           <div className="mt-5 p-5 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border-2 border-purple-200 dark:border-purple-800 rounded-xl text-center">
             <div className="text-4xl mb-3">🚀</div>

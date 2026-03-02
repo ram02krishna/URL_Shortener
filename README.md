@@ -273,3 +273,26 @@ Open your web browser and navigate to the frontend URL (e.g., `http://localhost:
 3. Manage all your shortened URLs in the dashboard
 
 ---
+
+## Vercel Deployment
+
+Shortify is fully optimized for deployment on Vercel. Both the frontend and backend can be hosted seamlessly. 
+
+### Backend Deployment
+1. Import the `backend` folder into a new Vercel project.
+2. The `vercel.json` file is already configured to route traffic to `index.js`.
+3. Set the following Environment Variables in Vercel:
+   - `DATABASE_URL`: Your production PostgreSQL connection string (Supabase, Neon, etc.).
+   - `JWT_SECRET`: A secure random string.
+   - `CORS_ORIGIN`: The URL of your deployed frontend (e.g., `https://your-frontend.vercel.app`).
+
+### Frontend Deployment
+1. Import the `frontend` folder into a new Vercel project.
+2. Vercel will automatically detect it as a Vite/React application.
+3. The `vercel.json` in the frontend handles single-page application (SPA) routing, automatically preventing 404 errors on refresh.
+4. Set the following Environment Variable in Vercel:
+   - `VITE_BACKEND_URL`: The URL of your deployed backend (e.g., `https://your-backend.vercel.app`).
+   
+*Note: QR Codes and URL redrections rely directly on the deployed backend URL, making them fully functional out-of-the-box upon deployment!*
+
+---
