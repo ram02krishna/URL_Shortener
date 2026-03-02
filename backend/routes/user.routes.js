@@ -93,10 +93,9 @@ router.post("/login", async (req, res) => {
     );
 
     if (validationResult.error) {
+      const firstIssue = validationResult.error.issues?.[0];
       return res.status(400).json({
-        error: {
-          issues: validationResult.error.issues,
-        },
+        error: firstIssue?.message ?? "Invalid request body",
       });
     }
 

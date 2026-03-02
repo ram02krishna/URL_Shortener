@@ -12,6 +12,8 @@ export const urlsTable = pgTable("urls", {
 
   deviceId: varchar("device_id", { length: 255 }), // For tracking free/anonymous URLs
 
+  expiresAt: timestamp("expires_at"), // null = never expires
+
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
 }, (table) => {

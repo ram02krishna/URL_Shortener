@@ -26,13 +26,13 @@ router.post("/shorten-free", async function (req, res) {
       return res.status(400).json({ error: validationResult.error });
     }
 
-    const { url, code, deviceId } = validationResult.data;
+    const { url, code, deviceId, expiresAt } = validationResult.data;
 
     if (!deviceId) {
       return res.status(400).json({ error: "Device ID is required for free tier" });
     }
 
-    const result = await createShortUrl({ url, code, deviceId });
+    const result = await createShortUrl({ url, code, deviceId, expiresAt });
 
     return res.status(201).json({
       id: result.id,
@@ -64,9 +64,9 @@ router.post("/shorten", ensureAuthenticated, async function (req, res) {
       return res.status(400).json({ error: validationResult.error });
     }
 
-    const { url, code } = validationResult.data;
+    const { url, code, expiresAt } = validationResult.data;
 
-    const result = await createShortUrl({ url, code, userId: req.user.id });
+    const result = await createShortUrl({ url, code, userId: req.user.id, expiresAt });
 
     return res.status(201).json({
       id: result.id,
@@ -117,12 +117,19 @@ router.get("/:shortCode", async function (req, res) {
   try {
     const code = req.params.shortCode;
     const [result] = await db
-      .select({ targetURL: urlsTable.targetURL })
+      .select({ targetURL: urlsTable.targetURL, expiresAt: urlsTable.expiresAt })
       .from(urlsTable)
       .where(eq(urlsTable.shortCode, code));
 
     if (!result) {
-      return res.status(404).json({ error: "Invalid URL" });
+      return res.status(404).json({ error: "Short URL not found" });
+    }
+
+    // Check if the link has expired
+    if (result.expiresAt && new Date() > new Date(result.expiresAt)) {
+      return res.status(410).json({
+        error: "This link has expired and is no longer available.",
+      });
     }
 
     return res.redirect(result.targetURL);
