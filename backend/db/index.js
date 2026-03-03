@@ -4,6 +4,10 @@ import { drizzle as drizzleNeon } from "drizzle-orm/neon-http";
 import { drizzle as drizzlePg } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL is not defined in the environment variables");
+}
+
 let db;
 
 if (process.env.VERCEL === "1") {

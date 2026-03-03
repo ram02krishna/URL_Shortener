@@ -9,7 +9,7 @@ import urlRouter from "./routes/url.routes.js";
 const app = express();
 const PORT = process.env.PORT ?? 8000;
 
-// ✅ ADD THIS (CORS CONFIG)
+// ✅ CORS CONFIG
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map(o => o.trim().replace(/\/$/, ""))
   : ["http://localhost:5173"];
@@ -63,6 +63,17 @@ app.get("/", (req, res) => {
 
 app.use("/user", authLimiter, userRouter);
 app.use(urlLimiter, urlRouter);
+
+// ✅ GLOBAL ERROR HANDLER — catches any error thrown/forwarded via next(err) in any route or middleware
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  console.error("[Global Error Handler]", err);
+  const statusCode = err.status ?? err.statusCode ?? 500;
+  return res.status(statusCode).json({
+    error: err.message || "Internal Server Error",
+    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
+  });
+});
 
 // Only listen locally, Vercel will export the app instead
 if (process.env.NODE_ENV !== "production" && process.env.VERCEL !== "1") {
