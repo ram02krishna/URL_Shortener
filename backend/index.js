@@ -54,8 +54,11 @@ app.get("/", (req, res) => {
 app.use("/user", authLimiter, userRouter);
 app.use(urlLimiter, urlRouter);
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server is running on http://0.0.0.0:${PORT}`);
-});
+// Only listen locally, Vercel will export the app instead
+if (process.env.NODE_ENV !== "production" && process.env.VERCEL !== "1") {
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server is running on http://0.0.0.0:${PORT}`);
+  });
+}
 
 export default app;
