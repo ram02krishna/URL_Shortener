@@ -12,11 +12,11 @@ import QRCode from "react-qr-code";
 // Constants
 const EXPIRY_OPTIONS = [
   { label: "No expiry", value: null },
-  { label: "1 hour",    value: 1 * 60 * 60 * 1000 },
-  { label: "24 hours",  value: 24 * 60 * 60 * 1000 },
-  { label: "7 days",    value: 7 * 24 * 60 * 60 * 1000 },
-  { label: "30 days",   value: 30 * 24 * 60 * 60 * 1000 },
-  { label: "Custom…",   value: "custom" },
+  { label: "1 hour", value: 1 * 60 * 60 * 1000 },
+  { label: "24 hours", value: 24 * 60 * 60 * 1000 },
+  { label: "7 days", value: 7 * 24 * 60 * 60 * 1000 },
+  { label: "30 days", value: 30 * 24 * 60 * 60 * 1000 },
+  { label: "Custom…", value: "custom" },
 ];
 
 function isExpired(expiresAt) {
@@ -33,8 +33,8 @@ const Dashboard = () => {
   const [showExpiryDropdown, setShowExpiryDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const [analyticsUrl, setAnalyticsUrl] = useState(null); // url object currently viewing analytics
-  const [qrCodeUrl, setQrCodeUrl] = useState(null); // url object currently viewing QR code
+  const [analyticsUrl, setAnalyticsUrl] = useState(null);
+  const [qrCodeUrl, setQrCodeUrl] = useState(null);
 
   useEffect(() => {
     getUserUrls()
@@ -105,7 +105,7 @@ const Dashboard = () => {
             <p className="text-sm text-gray-600 dark:text-gray-400">Manage your URLs</p>
           </div>
           <div className="flex items-center gap-4 sm:gap-6 overflow-x-auto pb-2 sm:pb-0 no-scrollbar">
-            <StatItem icon={<LinkIcon className="w-5 h-5" />} label="Total"  value={urls.length} />
+            <StatItem icon={<LinkIcon className="w-5 h-5" />} label="Total" value={urls.length} />
             <StatItem icon={<TrendingUp className="w-5 h-5" />} label="Active" value={activeCount} />
             <StatItem icon={<BarChart3 className="w-5 h-5" />} label="Clicks" value="—" />
           </div>
@@ -280,7 +280,7 @@ const ExpiryBadge = ({ expiresAt }) => {
 
 const URLCard = ({ url, onCopy, onDelete, onAnalytics, onQrCode }) => {
   const shortUrl = `${import.meta.env.VITE_BACKEND_URL}/${url.shortCode}`;
-  const expired  = isExpired(url.expiresAt);
+  const expired = isExpired(url.expiresAt);
 
   return (
     <div className={`bg-white dark:bg-gray-900 rounded-lg border p-4 transition-all shadow-sm ${expired ? "border-red-200 dark:border-red-900/50 opacity-75" : "border-gray-200 dark:border-gray-800 hover:border-purple-300 dark:hover:border-purple-700"}`}>
@@ -348,9 +348,9 @@ const URLCard = ({ url, onCopy, onDelete, onAnalytics, onQrCode }) => {
 
 // Analytics Modal
 const AnalyticsModal = ({ url, onClose }) => {
-  const [data, setData]       = useState(null);
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState(null);
+  const [error, setError] = useState(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -499,8 +499,8 @@ const BarList = ({ items, total }) => {
   return (
     <div className="space-y-2">
       {items.map((item, i) => {
-        const pct  = Math.round((Number(item.count) / total) * 100);
-        const fill = Math.round((Number(item.count) / max)   * 100);
+        const pct = Math.round((Number(item.count) / total) * 100);
+        const fill = Math.round((Number(item.count) / max) * 100);
         return (
           <div key={i} className="flex items-center gap-2 text-sm">
             <span className="w-24 truncate text-gray-600 dark:text-gray-400 text-xs font-medium shrink-0">
@@ -577,11 +577,10 @@ const VisitorTable = ({ rows }) => {
               <td className="px-3 py-2 text-gray-700 dark:text-gray-300 whitespace-nowrap">{row.browser ?? "—"}</td>
               <td className="px-3 py-2 text-gray-700 dark:text-gray-300 whitespace-nowrap">{row.os ?? "—"}</td>
               <td className="px-3 py-2">
-                <span className={`px-1.5 py-0.5 rounded-full font-medium ${
-                  row.device === "Mobile"  ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"  :
-                  row.device === "Tablet"  ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400" :
-                                             "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
-                }`}>{row.device ?? "—"}</span>
+                <span className={`px-1.5 py-0.5 rounded-full font-medium ${row.device === "Mobile" ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" :
+                    row.device === "Tablet" ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400" :
+                      "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+                  }`}>{row.device ?? "—"}</span>
               </td>
               <td className="px-3 py-2 text-gray-400 whitespace-nowrap">{fmt(row.clickedAt)}</td>
             </tr>
@@ -618,7 +617,7 @@ const DeleteConfirmModal = ({ onConfirm, onCancel }) => (
 
 const QRCodeModal = ({ url, onClose }) => {
   const shortUrl = `${import.meta.env.VITE_BACKEND_URL}/${url.shortCode}`;
-  
+
   // Close on Escape
   useEffect(() => {
     const handler = (e) => { if (e.key === "Escape") onClose(); };
@@ -669,7 +668,7 @@ const QRCodeModal = ({ url, onClose }) => {
             <X className="w-5 h-5" />
           </button>
         </div>
-        
+
         <div className="bg-white p-4 rounded-xl border border-gray-200 dark:border-gray-200 mx-auto w-fit shadow-sm">
           <QRCode
             id="qr-code-svg"
@@ -678,11 +677,11 @@ const QRCodeModal = ({ url, onClose }) => {
             className="rounded"
           />
         </div>
-        
+
         <p className="mt-6 mb-6 text-sm text-gray-500 dark:text-gray-400 font-mono break-all px-2 bg-gray-50 dark:bg-gray-800 py-2 rounded-lg border border-gray-100 dark:border-gray-800">
           {shortUrl}
         </p>
-        
+
         <button
           onClick={downloadQrCode}
           className="w-full px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2"

@@ -26,10 +26,10 @@ const Register = () => {
 
     try {
       const res = await registerUser(form);
-      
+
       // Auto-login after successful registration
       const token = res.data?.token || res.data?.data?.token || res.data?.accessToken;
-      
+
       if (token) {
         setToken(token);
         setUser({ loggedIn: true });
@@ -53,7 +53,7 @@ const Register = () => {
     <div className="min-h-[calc(100vh-52px)] py-8 bg-gray-50 dark:bg-gray-950 flex items-center justify-center px-4 transition-colors duration-300">
       <div className="w-full max-w-md">
         <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-xl p-6 sm:p-8 transition-all">
-          
+
           {/* Header */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl mb-4 shadow-sm">
@@ -84,7 +84,7 @@ const Register = () => {
                   }
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   Last name
@@ -100,7 +100,7 @@ const Register = () => {
                 />
               </div>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                 Email
@@ -116,7 +116,7 @@ const Register = () => {
                 }
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                 Password
