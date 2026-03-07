@@ -10,9 +10,9 @@ export const urlsTable = pgTable("urls", {
   userId: uuid("user_id")
     .references(() => usersTable.id),
 
-  deviceId: varchar("device_id", { length: 255 }), // For tracking free/anonymous URLs
+  deviceId: varchar("device_id", { length: 255 }),
 
-  expiresAt: timestamp("expires_at"), // null = never expires
+  expiresAt: timestamp("expires_at"),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
