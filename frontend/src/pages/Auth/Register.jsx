@@ -14,16 +14,24 @@ const Register = () => {
     firstname: "",
     lastname: "",
     email: "",
-    password: ""
+    password: "",
+    confirmPassword: ""
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
   const [otp, setOtp] = useState("");
 
   const submit = async (e) => {
     e.preventDefault();
+
+    if (form.password !== form.confirmPassword) {
+      toast.error("Passwords do not match!");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -158,6 +166,32 @@ const Register = () => {
                     className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-sm text-purple-600 dark:text-purple-400 font-medium hover:text-purple-700 transition-colors disabled:opacity-50"
                   >
                     {showPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirm your password"
+                    required
+                    disabled={loading}
+                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all font-medium"
+                    onChange={(e) =>
+                      setForm({ ...form, confirmPassword: e.target.value })
+                    }
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    disabled={loading}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-sm text-purple-600 dark:text-purple-400 font-medium hover:text-purple-700 transition-colors disabled:opacity-50"
+                  >
+                    {showConfirmPassword ? "Hide" : "Show"}
                   </button>
                 </div>
               </div>

@@ -1,11 +1,17 @@
 import { z } from "zod";
 
-export const signupPostRequestBodySchema = z.object({
-  firstname: z.string(),
-  lastname: z.string(),
-  email: z.string().email(),
-  password: z.string().min(5),
-});
+export const signupPostRequestBodySchema = z
+  .object({
+    firstname: z.string(),
+    lastname: z.string(),
+    email: z.string().email(),
+    password: z.string().min(5),
+    confirmPassword: z.string().min(5),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 export const loginPostRequestBodySchema = z.object({
   email: z.string().email(),
