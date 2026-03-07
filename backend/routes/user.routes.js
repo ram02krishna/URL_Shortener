@@ -51,8 +51,9 @@ router.post(
       otpExpiry,
     });
 
-    // Send the email asynchronously in the background so the user doesn't wait
-    sendOTPEmail(email, otp).catch(err => console.error("Failed to send OTP email:", err));
+    // Await the email sending on serverless environments like Vercel
+    // otherwise the function might terminate before the email is actually sent.
+    await sendOTPEmail(email, otp);
 
     return res.status(201).json({
       message: "User created, OTP sent to email",
