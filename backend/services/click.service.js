@@ -29,37 +29,35 @@ async function geoLookup(ip) {
   }
 }
 
-// Logs a click event asynchronously
-export function logClick({ urlId, ip, ua }) {
-  (async () => {
-    try {
-      // Parse UA
-      const parser = new UAParser(ua);
-      const result = parser.getResult();
-      const browser = result.browser.name ?? "Unknown";
-      const os = result.os.name ?? "Unknown";
-      const rawType = result.device.type;
-      const device = rawType === "mobile" ? "Mobile"
-        : rawType === "tablet" ? "Tablet"
-          : "Desktop";
+// Logs a click event
+export async function logClick({ urlId, ip, ua }) {
+  try {
+    // Parse UA
+    const parser = new UAParser(ua);
+    const result = parser.getResult();
+    const browser = result.browser.name ?? "Unknown";
+    const os = result.os.name ?? "Unknown";
+    const rawType = result.device.type;
+    const device = rawType === "mobile" ? "Mobile"
+      : rawType === "tablet" ? "Tablet"
+        : "Desktop";
 
-      // Lookup Geo
-      const { country, city, latitude, longitude } = await geoLookup(ip);
+    // Lookup Geo
+    const { country, city, latitude, longitude } = await geoLookup(ip);
 
-      // Insert stats
-      await db.insert(clicksTable).values({
-        urlId,
-        ipAddress: ip || "Unknown",
-        country,
-        city,
-        latitude,
-        longitude,
-        browser,
-        os,
-        device,
-      });
-    } catch (err) {
-      console.error("[logClick error]", err.message);
-    }
-  })();
+    // Insert stats
+    await db.insert(clicksTable).values({
+      urlId,
+      ipAddress: ip || "Unknown",
+      country,
+      city,
+      latitude,
+      longitude,
+      browser,
+      os,
+      device,
+    });
+  } catch (err) {
+    console.error("[logClick error]", err.message);
+  }
 }

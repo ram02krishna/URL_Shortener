@@ -145,12 +145,12 @@ router.get(
       return res.redirect(`${frontendUrl}/p/${code}`);
     }
 
-    // Fire-and-forget click logging (never delays the redirect)
+    // Log click and await it to ensure it finishes on serverless environments
     const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim()
       ?? req.socket.remoteAddress
       ?? "Unknown";
     const ua = req.headers["user-agent"] ?? "";
-    logClick({ urlId: result.id, ip, ua });
+    await logClick({ urlId: result.id, ip, ua });
 
     return res.redirect(result.targetURL);
   })
@@ -191,12 +191,12 @@ router.post(
       return res.status(401).json({ error: "Incorrect password" });
     }
 
-    // Password matches, log click and return target URL
+    // Password matches, log click and await it
     const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim()
       ?? req.socket.remoteAddress
       ?? "Unknown";
     const ua = req.headers["user-agent"] ?? "";
-    logClick({ urlId: result.id, ip, ua });
+    await logClick({ urlId: result.id, ip, ua });
 
     return res.json({ targetURL: result.targetURL });
   })
