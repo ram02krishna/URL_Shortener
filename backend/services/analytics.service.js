@@ -30,20 +30,20 @@ export async function getUrlAnalytics(urlId) {
   ] = await Promise.all([
     // Total & unique clicks
     db.select({
-      totalClicks:  count().as("total_clicks"),
+      totalClicks: count().as("total_clicks"),
       uniqueClicks: countDistinct(clicksTable.ipAddress).as("unique_clicks"),
     }).from(clicksTable).where(where),
 
     // Clicks by day — last 30 days
     db.select({
-      date:  sql`DATE(${clicksTable.clickedAt})`.as("date"),
+      date: sql`DATE(${clicksTable.clickedAt})`.as("date"),
       count: count().as("count"),
     })
-    .from(clicksTable)
-    .where(sql`${clicksTable.urlId} = ${urlId}
+      .from(clicksTable)
+      .where(sql`${clicksTable.urlId} = ${urlId}
                AND ${clicksTable.clickedAt} >= NOW() - INTERVAL '30 days'`)
-    .groupBy(sql`DATE(${clicksTable.clickedAt})`)
-    .orderBy(sql`DATE(${clicksTable.clickedAt}) asc`),
+      .groupBy(sql`DATE(${clicksTable.clickedAt})`)
+      .orderBy(sql`DATE(${clicksTable.clickedAt}) asc`),
 
     // Breakdowns
     topN(clicksTable.country),
@@ -54,22 +54,24 @@ export async function getUrlAnalytics(urlId) {
 
     // Visitor IPs — most recently seen first
     db.select({
-      ip:        clicksTable.ipAddress,
-      country:   clicksTable.country,
-      city:      clicksTable.city,
-      browser:   clicksTable.browser,
-      os:        clicksTable.os,
-      device:    clicksTable.device,
+      ip: clicksTable.ipAddress,
+      country: clicksTable.country,
+      city: clicksTable.city,
+      latitude: clicksTable.latitude,
+      longitude: clicksTable.longitude,
+      browser: clicksTable.browser,
+      os: clicksTable.os,
+      device: clicksTable.device,
       clickedAt: clicksTable.clickedAt,
     })
-    .from(clicksTable)
-    .where(where)
-    .orderBy(desc(clicksTable.clickedAt))
-    .limit(50),
+      .from(clicksTable)
+      .where(where)
+      .orderBy(desc(clicksTable.clickedAt))
+      .limit(50),
   ]);
 
   return {
-    totalClicks:  Number(totals?.totalClicks  ?? 0),
+    totalClicks: Number(totals?.totalClicks ?? 0),
     uniqueClicks: Number(totals?.uniqueClicks ?? 0),
     topCountries,
     topCities,

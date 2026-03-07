@@ -28,7 +28,8 @@ This directory contains the backend for the Shortify URL shortener application. 
 - **Database**: PostgreSQL
 - **ORM**: Drizzle ORM
 - **Authentication**: JSON Web Tokens (JWT)
-- **Validation**: Zod
+- **Validation**: Zod (Centralized Middleware)
+- **Error Handling**: Centralized `asyncHandler` and global error router wrapper
 - **Rate Limiting**: `express-rate-limit`
 - **ID Generation**: `nanoid`
 
@@ -212,7 +213,7 @@ The backend exposes a specific endpoint (`/shorten-free`) that bypasses standard
 
 ## Error Handling
 
-The API returns appropriate HTTP status codes and error messages:
+The API employs a centralized `asyncHandler` wrapper around all endpoints to seamlessly catch unhandled exceptions, which are then passed on to a master Error Handler in `index.js`. It returns appropriate HTTP status codes and error messages:
 
 - `400 Bad Request`: Invalid input or validation error
 - `401 Unauthorized`: Missing or invalid authentication token

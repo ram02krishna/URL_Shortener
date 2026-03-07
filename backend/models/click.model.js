@@ -9,15 +9,17 @@ export const clicksTable = pgTable("url_clicks", {
     .references(() => urlsTable.id, { onDelete: "cascade" }),
 
   ipAddress: varchar("ip_address", { length: 45 }),  // supports IPv6
-  country:   varchar("country",    { length: 100 }),
-  city:      varchar("city",       { length: 100 }),
+  country: varchar("country", { length: 100 }),
+  city: varchar("city", { length: 100 }),
+  latitude: varchar("latitude", { length: 50 }),
+  longitude: varchar("longitude", { length: 50 }),
 
   browser: varchar("browser", { length: 100 }),
-  os:      varchar("os",      { length: 100 }),
-  device:  varchar("device",  { length: 50 }),  // "mobile" | "tablet" | "desktop"
+  os: varchar("os", { length: 100 }),
+  device: varchar("device", { length: 50 }),  // "mobile" | "tablet" | "desktop"
 
   clickedAt: timestamp("clicked_at").defaultNow().notNull(),
 }, (table) => ({
-  urlIdIndex:      index("clicks_url_id_idx").on(table.urlId),
-  clickedAtIndex:  index("clicks_clicked_at_idx").on(table.clickedAt),
+  urlIdIndex: index("clicks_url_id_idx").on(table.urlId),
+  clickedAtIndex: index("clicks_clicked_at_idx").on(table.clickedAt),
 }));

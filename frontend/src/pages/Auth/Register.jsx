@@ -1,6 +1,6 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { registerUser } from "../../services/auth.service";
+import { registerUser, verifyEmail } from "../../services/auth.service";
 import { setToken } from "../../utils/token";
 import { useAuth } from "../../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
@@ -19,6 +19,8 @@ const Register = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState(1);
+  const [otp, setOtp] = useState("");
 
   const submit = async (e) => {
     e.preventDefault();
@@ -26,23 +28,37 @@ const Register = () => {
 
     try {
       const res = await registerUser(form);
+      toast.success(res.data?.message || "OTP sent to your email!");
+      setStep(2);
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.error || err?.response?.data?.message || "Registration failed. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      // Auto-login after successful registration
-      const token = res.data?.token || res.data?.data?.token || res.data?.accessToken;
+  const verifySubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
 
+    try {
+      const res = await verifyEmail({ email: form.email, otp });
+
+      const token = res.data?.token;
       if (token) {
         setToken(token);
         setUser({ loggedIn: true });
-        toast.success("Account created! Welcome to Shortify!");
+        toast.success("Email verified! Welcome to Shortify!");
         navigate("/dashboard");
       } else {
-        // Fallback: redirect to login if no token
-        toast.success("Account created successfully! Please login.");
+        toast.success("Email verified successfully! Please login.");
         navigate("/login");
       }
     } catch (err) {
       toast.error(
-        err?.response?.data?.message || "Registration failed. Please try again."
+        err?.response?.data?.error || "Verification failed. Please try again."
       );
     } finally {
       setLoading(false);
@@ -60,103 +76,150 @@ const Register = () => {
               <UserPlus className="w-6 h-6 text-purple-600 dark:text-purple-400" />
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-              Create your account
+              {step === 1 ? "Create your account" : "Verify your email"}
             </h2>
             <p className="mt-2 text-gray-600 dark:text-gray-400">
-              Sign up to start shortening URLs
+              {step === 1
+                ? "Sign up to start shortening URLs"
+                : `We sent a 6-digit code to ${form.email}`}
             </p>
           </div>
 
           {/* Form */}
-          <form onSubmit={submit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+          {step === 1 ? (
+            <form onSubmit={submit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    First name
+                  </label>
+                  <input
+                    placeholder="John"
+                    required
+                    disabled={loading}
+                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all font-medium"
+                    onChange={(e) =>
+                      setForm({ ...form, firstname: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    Last name
+                  </label>
+                  <input
+                    placeholder="Doe"
+                    required
+                    disabled={loading}
+                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all font-medium"
+                    onChange={(e) =>
+                      setForm({ ...form, lastname: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                  First name
+                  Email
                 </label>
                 <input
-                  placeholder="John"
+                  type="email"
+                  placeholder="you@example.com"
                   required
                   disabled={loading}
                   className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all font-medium"
                   onChange={(e) =>
-                    setForm({ ...form, firstname: e.target.value })
+                    setForm({ ...form, email: e.target.value })
                   }
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                  Last name
+                  Password
                 </label>
-                <input
-                  placeholder="Doe"
-                  required
-                  disabled={loading}
-                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all font-medium"
-                  onChange={(e) =>
-                    setForm({ ...form, lastname: e.target.value })
-                  }
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Create a password"
+                    required
+                    disabled={loading}
+                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all font-medium"
+                    onChange={(e) =>
+                      setForm({ ...form, password: e.target.value })
+                    }
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    disabled={loading}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-sm text-purple-600 dark:text-purple-400 font-medium hover:text-purple-700 transition-colors disabled:opacity-50"
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                Email
-              </label>
-              <input
-                type="email"
-                placeholder="you@example.com"
-                required
+              <button
                 disabled={loading}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all font-medium"
-                onChange={(e) =>
-                  setForm({ ...form, email: e.target.value })
-                }
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                Password
-              </label>
-              <div className="relative">
+                className="w-full px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed mt-4 flex items-center justify-center gap-2 transition-all shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Creating account...
+                  </>
+                ) : (
+                  "Create Account"
+                )}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={verifySubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Verification Code
+                </label>
                 <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Create a password"
+                  type="text"
+                  placeholder="123456"
                   required
+                  maxLength={6}
                   disabled={loading}
-                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all font-medium"
-                  onChange={(e) =>
-                    setForm({ ...form, password: e.target.value })
-                  }
+                  className="w-full px-4 py-3 text-center tracking-[0.5em] text-2xl bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all font-medium"
+                  onChange={(e) => setOtp(e.target.value)}
+                  value={otp}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  disabled={loading}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-sm text-purple-600 dark:text-purple-400 font-medium hover:text-purple-700 transition-colors disabled:opacity-50"
-                >
-                  {showPassword ? "Hide" : "Show"}
-                </button>
               </div>
-            </div>
 
-            <button
-              disabled={loading}
-              className="w-full px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed mt-4 flex items-center justify-center gap-2 transition-all shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Creating account...
-                </>
-              ) : (
-                "Create Account"
-              )}
-            </button>
-          </form>
+              <button
+                disabled={loading || otp.length !== 6}
+                className="w-full px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed mt-4 flex items-center justify-center gap-2 transition-all shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Verifying...
+                  </>
+                ) : (
+                  "Verify Email"
+                )}
+              </button>
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() => {
+                  setStep(1);
+                  setOtp("");
+                }}
+                className="w-full mt-2 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 font-medium transition-colors"
+              >
+                Back to registration
+              </button>
+            </form>
+          )}
 
           {/* Footer */}
           <p className="mt-8 text-center text-sm text-gray-600 dark:text-gray-400">

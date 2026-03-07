@@ -17,4 +17,5 @@ export const shortenPostRequestBodySchema = z.object({
   code: z.string().optional(),
   deviceId: z.string().optional(), // For free tier tracking
   expiresAt: z.string().datetime().optional(), // ISO 8601 string, null = never expires
+  password: z.string().optional(),
 });

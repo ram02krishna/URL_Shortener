@@ -4,6 +4,7 @@ import Login from "../pages/Auth/Login";
 import Register from "../pages/Auth/Register";
 import Dashboard from "../pages/Dashboard";
 import NotFound from "../pages/NotFound";
+import ProtectedUrl from "../pages/ProtectedUrl";
 import { useAuth } from "../context/AuthContext";
 
 const AppRoutes = () => {
@@ -34,6 +35,8 @@ const AppRoutes = () => {
           )
         }
       />
+
+      <Route path="/p/:shortCode" element={<ProtectedUrl />} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>

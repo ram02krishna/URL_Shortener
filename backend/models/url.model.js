@@ -13,6 +13,7 @@ export const urlsTable = pgTable("urls", {
   deviceId: varchar("device_id", { length: 255 }),
 
   expiresAt: timestamp("expires_at"),
+  password: varchar("password", { length: 255 }),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),

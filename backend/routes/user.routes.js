@@ -7,29 +7,20 @@ import { hashPasswordWithSalt } from "../utils/hash.js";
 import { getUserByEmail } from "../services/user.service.js";
 import { createNewUser } from "../services/newuser.service.js";
 import { createUserToken } from "../utils/token.js";
+import { sendOTPEmail } from "../utils/email.js";
+import { db } from "../db/index.js";
+import { usersTable } from "../models/user.model.js";
+import { eq } from "drizzle-orm";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { validate } from "../middlewares/validate.middleware.js";
 
 const router = express.Router();
 
-router.post("/signup", async (req, res) => {
-  try {
-    // const { firstname, lastname, email, password } = req.body;
-
-    const validationResult = await signupPostRequestBodySchema.safeParseAsync(
-      req.body
-    );
-
-    if (validationResult.error) {
-      return res.status(400).json({
-        error: validationResult.error.format(),
-      });
-    }
-
-    const { firstname, lastname, email, password } = validationResult.data;
-
-    // const [existingUser] = await db
-    //   .select({ id: usersTable.id })
-    //   .from(usersTable)
-    //   .where(eq(usersTable.email, email));
+router.post(
+  "/signup",
+  validate(signupPostRequestBodySchema),
+  asyncHandler(async (req, res) => {
+    const { firstname, lastname, email, password } = req.body;
 
     const existingUser = await getUserByEmail(email);
 
@@ -46,22 +37,9 @@ router.post("/signup", async (req, res) => {
 
     const { salt, password: hashedPassword } = hashPasswordWithSalt(password);
 
-    // const [user] = await db
-    //   .insert(usersTable)
-    //   .values({
-    //     firstname,
-    //     lastname,
-    //     email,
-    //     salt,
-    //     password: hashedPassword,
-    //   })
-    //   .returning({ id: usersTable.id });
-
-    // return res.status(201).json({
-    //   data: {
-    //     userId: user.id,
-    //   },
-    // });
+    // Generate 6 digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 mins
 
     const user = await createNewUser({
       firstname,
@@ -69,43 +47,39 @@ router.post("/signup", async (req, res) => {
       email,
       salt,
       hashedPassword,
+      otp,
+      otpExpiry,
     });
 
+    // Send the email asynchronously in the background so the user doesn't wait
+    sendOTPEmail(email, otp).catch(err => console.error("Failed to send OTP email:", err));
+
     return res.status(201).json({
+      message: "User created, OTP sent to email",
       data: {
         userId: user.id,
       },
     });
-  } catch (error) {
-    console.error(error);
+  })
+);
 
-    return res.status(500).json({
-      error: error.message || "Internal Server Error",
-      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
-    });
-  }
-});
-
-router.post("/login", async (req, res) => {
-  try {
-    const validationResult = await loginPostRequestBodySchema.safeParseAsync(
-      req.body
-    );
-
-    if (validationResult.error) {
-      const firstIssue = validationResult.error.issues?.[0];
-      return res.status(400).json({
-        error: firstIssue?.message ?? "Invalid request body",
-      });
-    }
-
-    const { email, password } = validationResult.data;
+router.post(
+  "/login",
+  validate(loginPostRequestBodySchema),
+  asyncHandler(async (req, res) => {
+    const { email, password } = req.body;
 
     const user = await getUserByEmail(email);
 
     if (!user) {
       return res.status(400).json({
         error: `User with email ${email} does not exist`,
+      });
+    }
+
+    if (!user.isVerified) {
+      return res.status(403).json({
+        error: "Account not verified. Please verify your email first.",
       });
     }
 
@@ -124,12 +98,54 @@ router.post("/login", async (req, res) => {
     const token = await createUserToken({ id: user.id });
 
     return res.json({ token });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      error: "Internal Server Error",
+  })
+);
+
+router.post(
+  "/verify-email",
+  asyncHandler(async (req, res) => {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({ error: "Email and OTP are required" });
+    }
+
+    const user = await getUserByEmail(email);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ error: "User already verified" });
+    }
+
+    if (user.otp !== otp) {
+      return res.status(400).json({ error: "Invalid OTP" });
+    }
+
+    if (new Date() > new Date(user.otpExpiry)) {
+      return res.status(400).json({ error: "OTP expired. Please register again or request new OTP." });
+    }
+
+    // Update user to verified
+    await db
+      .update(usersTable)
+      .set({
+        isVerified: true,
+        otp: null,
+        otpExpiry: null,
+      })
+      .where(eq(usersTable.id, user.id));
+
+    // Login user automatically after verification
+    const token = await createUserToken({ id: user.id });
+
+    return res.json({
+      message: "Email verified successfully",
+      token
     });
-  }
-});
+  })
+);
 
 export default router;

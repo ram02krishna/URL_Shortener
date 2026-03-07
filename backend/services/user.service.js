@@ -11,6 +11,9 @@ export async function getUserByEmail(email) {
       email: usersTable.email,
       salt: usersTable.salt,
       password: usersTable.password,
+      isVerified: usersTable.isVerified,
+      otp: usersTable.otp,
+      otpExpiry: usersTable.otpExpiry,
     })
     .from(usersTable)
     .where(eq(usersTable.email, email));
@@ -18,15 +21,15 @@ export async function getUserByEmail(email) {
   return existingUser;
 }
 export async function getUserById(id) {
-	const [existingUser] = await db
-		.select({
-			id: usersTable.id,
-			firstname: usersTable.firstname,
-			lastname: usersTable.lastname,
-			email: usersTable.email,
-		})
-		.from(usersTable)
-		.where(eq(usersTable.id, id));
+  const [existingUser] = await db
+    .select({
+      id: usersTable.id,
+      firstname: usersTable.firstname,
+      lastname: usersTable.lastname,
+      email: usersTable.email,
+    })
+    .from(usersTable)
+    .where(eq(usersTable.id, id));
 
-	return existingUser;
+  return existingUser;
 }

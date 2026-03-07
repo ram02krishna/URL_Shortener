@@ -9,3 +9,8 @@ export const loginUser = (data) => {
 export const registerUser = (data) => {
   return api.post("/user/signup", data);
 };
+
+// VERIFY EMAIL
+export const verifyEmail = (data) => {
+  return api.post("/user/verify-email", data);
+};

@@ -7,6 +7,8 @@ export async function createNewUser({
   email,
   salt,
   hashedPassword,
+  otp,
+  otpExpiry,
 }) {
   const [user] = await db
     .insert(usersTable)
@@ -16,6 +18,9 @@ export async function createNewUser({
       email,
       salt,
       password: hashedPassword,
+      isVerified: false,
+      otp,
+      otpExpiry,
     })
     .returning({
       id: usersTable.id,

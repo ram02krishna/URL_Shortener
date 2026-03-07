@@ -4,7 +4,7 @@ import {
   Copy, Trash2, ExternalLink, Plus, TrendingUp,
   Link as LinkIcon, BarChart3, Loader2, Clock, ChevronDown,
   X, Globe, Monitor, Smartphone, MousePointerClick, Users,
-  RefreshCw, MapPin, Network, QrCode
+  RefreshCw, MapPin, Network, QrCode, Lock
 } from "lucide-react";
 import { createShortUrl, getUserUrls, deleteUrl, getUrlAnalytics } from "../services/url.service";
 import QRCode from "react-qr-code";
@@ -30,6 +30,7 @@ const Dashboard = () => {
   const [originalUrl, setOriginalUrl] = useState("");
   const [expiryOption, setExpiryOption] = useState(null);
   const [customDate, setCustomDate] = useState("");
+  const [password, setPassword] = useState("");
   const [showExpiryDropdown, setShowExpiryDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
@@ -62,11 +63,13 @@ const Dashboard = () => {
     try {
       const payload = { url: originalUrl };
       if (expiresAt) payload.expiresAt = expiresAt;
+      if (password) payload.password = password;
       const res = await createShortUrl(payload);
       setUrls([res.data, ...urls]);
       setOriginalUrl("");
       setExpiryOption(null);
       setCustomDate("");
+      setPassword("");
       toast.success("Short URL created!");
     } catch {
       toast.error("Failed to shorten URL");
@@ -160,6 +163,22 @@ const Dashboard = () => {
               >
                 {loading ? <><Loader2 className="w-5 h-5 animate-spin" /><span>Creating...</span></> : <><Plus className="w-5 h-5" /><span>Shorten</span></>}
               </button>
+            </div>
+
+            <div className="mt-3 flex flex-col sm:flex-row gap-3">
+              <div className="flex-1 relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                </div>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Optional: Set a password to protect this link"
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                  disabled={loading}
+                />
+              </div>
             </div>
 
             {expiryOption === "custom" && (
@@ -286,7 +305,10 @@ const URLCard = ({ url, onCopy, onDelete, onAnalytics, onQrCode }) => {
     <div className={`bg-white dark:bg-gray-900 rounded-lg border p-4 transition-all shadow-sm ${expired ? "border-red-200 dark:border-red-900/50 opacity-75" : "border-gray-200 dark:border-gray-800 hover:border-purple-300 dark:hover:border-purple-700"}`}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-1 truncate font-medium">{url.targetURL}</p>
+          <div className="flex items-center gap-2 mb-1">
+            {url.hasPassword && <Lock className="w-3.5 h-3.5 text-purple-500 shrink-0" title="Password Protected" />}
+            <p className="text-sm text-gray-500 dark:text-gray-400 truncate font-medium">{url.targetURL}</p>
+          </div>
           <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={() => !expired && onCopy(url.shortCode)}
@@ -560,7 +582,7 @@ const VisitorTable = ({ rows }) => {
       <table className="w-full text-xs">
         <thead>
           <tr className="bg-gray-50 dark:bg-gray-800 text-left">
-            {["IP Address", "Location", "Browser", "OS", "Device", "Time"].map((h) => (
+            {["IP Address", "Location (Lat, Lon)", "Browser", "OS", "Device", "Time"].map((h) => (
               <th key={h} className="px-3 py-2 font-semibold text-gray-600 dark:text-gray-400 whitespace-nowrap">{h}</th>
             ))}
           </tr>
@@ -572,14 +594,14 @@ const VisitorTable = ({ rows }) => {
                 {row.ip ?? "—"}
               </td>
               <td className="px-3 py-2 text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                {[row.city, row.country].filter(Boolean).join(", ") || "Unknown"}
+                {row.latitude && row.longitude ? `${row.latitude}, ${row.longitude}` : "Unknown"}
               </td>
               <td className="px-3 py-2 text-gray-700 dark:text-gray-300 whitespace-nowrap">{row.browser ?? "—"}</td>
               <td className="px-3 py-2 text-gray-700 dark:text-gray-300 whitespace-nowrap">{row.os ?? "—"}</td>
               <td className="px-3 py-2">
                 <span className={`px-1.5 py-0.5 rounded-full font-medium ${row.device === "Mobile" ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" :
-                    row.device === "Tablet" ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400" :
-                      "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+                  row.device === "Tablet" ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400" :
+                    "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
                   }`}>{row.device ?? "—"}</span>
               </td>
               <td className="px-3 py-2 text-gray-400 whitespace-nowrap">{fmt(row.clickedAt)}</td>

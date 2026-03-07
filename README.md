@@ -31,7 +31,8 @@ Shortify is a modern, full-stack URL shortener application built with a React fr
 - **Database**: PostgreSQL
 - **ORM**: Drizzle ORM
 - **Authentication**: JSON Web Tokens (JWT)
-- **Validation**: Zod
+- **Validation**: Zod (Centralized Middleware)
+- **Error Handling**: Centralized `asyncHandler` and global error router
 - **Rate Limiting**: `express-rate-limit`
 - **ID Generation**: `nanoid`
 
