@@ -9,6 +9,9 @@ import urlRouter from "./routes/url.routes.js";
 const app = express();
 const PORT = process.env.PORT ?? 8000;
 
+// Enable 'trust proxy' for Vercel/proxies to fix express-rate-limit IP identification
+app.set("trust proxy", 1);
+
 // ✅ CORS CONFIG
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map(o => o.trim().replace(/\/$/, ""))
