@@ -2,7 +2,11 @@ import express from "express";
 import {
   signupPostRequestBodySchema,
   loginPostRequestBodySchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+  changePasswordSchema,
 } from "../validation/request.validation.js";
+import { ensureAuthenticated } from "../middlewares/auth.middleware.js";
 import { hashPasswordWithSalt } from "../utils/hash.js";
 import { getUserByEmail } from "../services/user.service.js";
 import { createNewUser } from "../services/newuser.service.js";
@@ -146,6 +150,102 @@ router.post(
       message: "Email verified successfully",
       token
     });
+  })
+);
+
+router.post(
+  "/forgot-password",
+  validate(forgotPasswordSchema),
+  asyncHandler(async (req, res) => {
+    const { email } = req.body;
+    const user = await getUserByEmail(email);
+
+    if (!user) {
+      // Don't leak whether user exists or not
+      return res.status(200).json({ message: "If that email is registered, you will receive a reset OTP shortly." });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 mins
+
+    await db
+      .update(usersTable)
+      .set({
+        otp,
+        otpExpiry,
+      })
+      .where(eq(usersTable.id, user.id));
+
+    await sendOTPEmail(email, otp);
+
+    return res.status(200).json({ message: "If that email is registered, you will receive a reset OTP shortly." });
+  })
+);
+
+router.post(
+  "/reset-password",
+  validate(resetPasswordSchema),
+  asyncHandler(async (req, res) => {
+    const { email, otp, newPassword } = req.body;
+    const user = await getUserByEmail(email);
+
+    if (!user) {
+      return res.status(400).json({ error: "Invalid request." });
+    }
+
+    if (user.otp !== otp) {
+      return res.status(400).json({ error: "Invalid OTP." });
+    }
+
+    if (new Date() > new Date(user.otpExpiry)) {
+       return res.status(400).json({ error: "OTP has expired." });
+    }
+
+    const { salt, password: hashedPassword } = hashPasswordWithSalt(newPassword);
+
+    await db
+      .update(usersTable)
+      .set({
+        salt,
+        password: hashedPassword,
+        otp: null,
+        otpExpiry: null,
+      })
+      .where(eq(usersTable.id, user.id));
+
+    return res.status(200).json({ message: "Password reset successfully. You can now log in." });
+  })
+);
+
+router.post(
+  "/change-password",
+  ensureAuthenticated,
+  validate(changePasswordSchema),
+  asyncHandler(async (req, res) => {
+    const { oldPassword, newPassword } = req.body;
+    const user = await getUserByEmail(req.user.email); 
+
+    if (!user) {
+      return res.status(400).json({ error: "User not found." });
+    }
+
+    const { password: oldHashedPassword } = hashPasswordWithSalt(oldPassword, user.salt);
+
+    if (user.password !== oldHashedPassword) {
+      return res.status(400).json({ error: "Incorrect old password." });
+    }
+
+    const { salt: newSalt, password: newHashedPassword } = hashPasswordWithSalt(newPassword);
+
+    await db
+      .update(usersTable)
+      .set({
+        salt: newSalt,
+        password: newHashedPassword,
+      })
+      .where(eq(usersTable.id, user.id));
+
+    return res.status(200).json({ message: "Password changed successfully." });
   })
 );
 

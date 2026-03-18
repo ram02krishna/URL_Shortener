@@ -5,6 +5,8 @@ import Register from "../pages/Auth/Register";
 import Dashboard from "../pages/Dashboard";
 import NotFound from "../pages/NotFound";
 import ProtectedUrl from "../pages/ProtectedUrl";
+import ForgotPassword from "../pages/Auth/ForgotPassword";
+import Settings from "../pages/Settings";
 import { useAuth } from "../context/AuthContext";
 
 const AppRoutes = () => {
@@ -26,10 +28,26 @@ const AppRoutes = () => {
       />
 
       <Route
+        path="/forgot-password"
+        element={!user ? <ForgotPassword /> : <Navigate to="/dashboard" replace />}
+      />
+
+      <Route
         path="/dashboard"
         element={
           user ? (
             <Dashboard />
+          ) : (
+            <Navigate to="/login" state={{ from: location }} replace />
+          )
+        }
+      />
+
+      <Route
+        path="/settings"
+        element={
+          user ? (
+            <Settings />
           ) : (
             <Navigate to="/login" state={{ from: location }} replace />
           )

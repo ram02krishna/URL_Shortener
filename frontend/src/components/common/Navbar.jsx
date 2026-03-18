@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, LogOut, LayoutDashboard } from "lucide-react";
+import { ArrowLeft, LogOut, LayoutDashboard, Settings } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 
@@ -108,7 +108,19 @@ const Navbar = () => {
                   <span className="hidden sm:inline">Dashboard</span>
                 </Link>
 
-                <span className="hidden md:block text-sm text-gray-600 dark:text-gray-400 px-2">
+                <Link
+                  to="/settings"
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
+                    location.pathname === "/settings"
+                      ? "bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400"
+                      : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
+                  }`}
+                >
+                  <Settings className="w-4 h-4" />
+                  <span className="hidden sm:inline">Settings</span>
+                </Link>
+
+                <span className="hidden md:block text-sm text-gray-600 dark:text-gray-400 px-2 border-l border-gray-200 dark:border-gray-700">
                   {user.name}
                 </span>
 

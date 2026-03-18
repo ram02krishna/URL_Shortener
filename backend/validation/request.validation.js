@@ -25,3 +25,18 @@ export const shortenPostRequestBodySchema = z.object({
   expiresAt: z.string().datetime().optional(), // ISO 8601 string, null = never expires
   password: z.string().optional(),
 });
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().email(),
+});
+
+export const resetPasswordSchema = z.object({
+  email: z.string().email(),
+  otp: z.string().length(6),
+  newPassword: z.string().min(5),
+});
+
+export const changePasswordSchema = z.object({
+  oldPassword: z.string(),
+  newPassword: z.string().min(5),
+});
