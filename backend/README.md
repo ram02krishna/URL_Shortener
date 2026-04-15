@@ -79,4 +79,8 @@ Defined with **Drizzle ORM** for PostgreSQL:
    - `DATABASE_URL`: Your PostgreSQL connection string.
    - `JWT_SECRET`: Random secure string.
    - `CORS_ORIGIN`: Your frontend URL.
-   - `EMAIL_USER` / `EMAIL_PASS`: For OTP functionality.
+   - `SMTP_HOST` : smtp.gmail.com
+   - `SMTP_PORT` : 587
+   - `SMTP_USER` : abc@gmail.com
+   - `SMTP_PASS` : Enter SMTP Password
+   - `SMTP_FROM` : Shortify Security

@@ -17,13 +17,13 @@ Shortify is a sleek, full-stack URL shortening platform built for speed, securit
 
 ## Tech Stack
 
-| Category          | Technology                                       |
-| ----------------- | ------------------------------------------------ |
-| **Frontend**      | React, Vite, Tailwind CSS, React Router, Axios   |
-| **Backend**       | Node.js, Express.js, PostgreSQL, Drizzle ORM     |
-| **Authentication**| JSON Web Tokens (JWT) + Email OTP                |
-| **Validation**    | Zod (Centralized Middleware)                     |
-| **Deployment**    | Docker, Docker Compose, Vercel (Serverless)      |
+| Category           | Technology                                     |
+| ------------------ | ---------------------------------------------- |
+| **Frontend**       | React, Vite, Tailwind CSS, React Router, Axios |
+| **Backend**        | Node.js, Express.js, PostgreSQL, Drizzle ORM   |
+| **Authentication** | JSON Web Tokens (JWT) + Email OTP              |
+| **Validation**     | Zod (Centralized Middleware)                   |
+| **Deployment**     | Docker, Docker Compose, Vercel (Serverless)    |
 
 ## Project Structure
 
@@ -47,6 +47,7 @@ To get the application up and running locally, follow these steps:
 ### Step 1: Clone the Repository
 
 Clone this project to your local machine:
+
 ```bash
 git clone <your-repository-url>
 cd <repository-folder>
@@ -57,6 +58,7 @@ cd <repository-folder>
 ### Step 2: Backend Setup
 
 1.  **Navigate to the backend directory**:
+
     ```bash
     cd backend
     ```
@@ -68,17 +70,24 @@ cd <repository-folder>
     DATABASE_URL="postgresql://postgres:admin@localhost:5432/postgres"
     JWT_SECRET=your-super-secret-key
     CORS_ORIGIN=http://localhost:5173
-    # Optional: Email configuration for OTP
-    EMAIL_USER=your-email@gmail.com
-    EMAIL_PASS=your-app-password
+    # SMTP Configuration (Required for Production Emails)
+    SMTP_HOST=smtp.gmail.com
+    SMTP_PORT=587
+    # Replace this with your Gmail address
+    SMTP_USER=abc@gmail.com
+    # Paste your 16-character Google App Password here (NO spaces)
+    SMTP_PASS=Enter SMTP Password
+    SMTP_FROM="Shortify Security"
     ```
 
 3.  **Start the Database**:
+
     ```bash
     docker-compose up -d
     ```
 
 4.  **Install & Migrate**:
+
     ```bash
     pnpm install
     pnpm db:push
@@ -94,6 +103,7 @@ cd <repository-folder>
 ### Step 3: Frontend Setup
 
 1.  **Navigate to the frontend directory**:
+
     ```bash
     cd frontend
     ```
@@ -112,6 +122,7 @@ cd <repository-folder>
 ### Quick API Examples
 
 **Authenticated URL Shortening with Expiration & Password**:
+
 ```bash
 curl -X POST http://localhost:8000/shorten \
   -H "Authorization: Bearer <your-jwt-token>" \
@@ -125,12 +136,14 @@ curl -X POST http://localhost:8000/shorten \
 ```
 
 **View URL Analytics**:
+
 ```bash
 curl -X GET http://localhost:8000/<url-id>/analytics \
   -H "Authorization: Bearer <your-jwt-token>"
 ```
 
 **Verify Email OTP**:
+
 ```bash
 curl -X POST http://localhost:8000/user/verify-email \
   -H "Content-Type: application/json" \
@@ -154,7 +167,8 @@ Shortify uses a relational schema managed by Drizzle ORM:
 
 ## Deployment
 
-Shortify is optimized for **Vercel**. 
+Shortify is optimized for **Vercel**.
+
 - Backend runs as serverless functions.
 - Frontend is a static SPA with client-side routing.
 - Database can be hosted on any PostgreSQL provider (Neon, Supabase, etc.).
