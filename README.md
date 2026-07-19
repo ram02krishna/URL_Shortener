@@ -8,6 +8,7 @@ nanoURL is a sleek, full-stack URL shortening platform built for speed, security
 - ** Advanced Analytics**: Gain deep insights with detailed click tracking, including IP addresses, browser info, OS, and device types.
 - ** Password-Protected Links**: Add an extra layer of security by requiring a password for specific shortened URLs.
 - ** Link Expiration**: Set custom expiration dates for your links to ensure they are only accessible when needed.
+- ** QR Code Generation**: Instantly generate and download QR codes for every shortened URL.
 - ** OTP Verification**: Secure user onboarding and password recovery via Email OTP (One-Time Password) verification.
 - ** Free-to-Try Tier**: Shorten up to 3 URLs instantly without an account—perfect for quick, anonymous shares.
 - ** Robust Security**: JWT-based authentication, salted password hashing, and centralized Zod-powered validation.
@@ -19,7 +20,7 @@ nanoURL is a sleek, full-stack URL shortening platform built for speed, security
 
 | Category           | Technology                                     |
 | ------------------ | ---------------------------------------------- |
-| **Frontend**       | React, Vite, Tailwind CSS, React Router, Axios |
+| **Frontend**       | React, Vite, Tailwind CSS, React Router, Axios, React QR Code |
 | **Backend**        | Node.js, Express.js, PostgreSQL, Drizzle ORM   |
 | **Authentication** | JSON Web Tokens (JWT) + Email OTP              |
 | **Validation**     | Zod (Centralized Middleware)                   |
