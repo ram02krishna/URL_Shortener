@@ -1,6 +1,6 @@
-# Shortify - A Full-Stack URL Shortener
+# nanoURL - A Full-Stack URL Shortener
 
-Shortify is a sleek, full-stack URL shortening platform built for speed, security, and simplicity. Developed with a modern React frontend and a robust Node.js/Express backend, it offers a seamless way to create, manage, and track shortened links. Whether you're a casual user looking for a quick shorten or a power user needing detailed analytics, Shortify provides a polished, responsive experience on any device.
+nanoURL is a sleek, full-stack URL shortening platform built for speed, security, and simplicity. Developed with a modern React frontend and a robust Node.js/Express backend, it offers a seamless way to create, manage, and track shortened links. Whether you're a casual user looking for a quick shorten or a power user needing detailed analytics, nanoURL provides a polished, responsive experience on any device.
 
 ## Key Features
 
@@ -77,7 +77,7 @@ cd <repository-folder>
     SMTP_USER=abc@gmail.com
     # Paste your 16-character Google App Password here (NO spaces)
     SMTP_PASS=Enter SMTP Password
-    SMTP_FROM="Shortify Security"
+    SMTP_FROM="nanoURL Security"
     ```
 
 3.  **Start the Database**:
@@ -157,7 +157,7 @@ curl -X POST http://localhost:8000/user/verify-email \
 
 ## Database Schema
 
-Shortify uses a relational schema managed by Drizzle ORM:
+nanoURL uses a relational schema managed by Drizzle ORM:
 
 - **`users`**: Stores user profiles, hashed passwords, and verification status.
 - **`urls`**: Stores shortened links, target URLs, expiration dates, and optional password protection.
@@ -167,7 +167,7 @@ Shortify uses a relational schema managed by Drizzle ORM:
 
 ## Deployment
 
-Shortify is optimized for **Vercel**.
+nanoURL is optimized for **Vercel**.
 
 - Backend runs as serverless functions.
 - Frontend is a static SPA with client-side routing.

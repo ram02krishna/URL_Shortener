@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, LogOut, LayoutDashboard, Settings } from "lucide-react";
+import { LayoutDashboard, Settings, LogOut, Moon, Sun, Monitor, Menu, X } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 
@@ -9,137 +9,143 @@ const Navbar = () => {
   const location = useLocation();
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-  const showBackButton = location.pathname !== "/";
-
-  // Cycle through themes: light -> dark -> system
   const cycleTheme = () => {
     if (theme === "light") setTheme("dark");
     else if (theme === "dark") setTheme("system");
     else setTheme("light");
   };
 
-  // Keyboard shortcuts
+  const ThemeIcon = theme === "light" ? Sun : theme === "dark" ? Moon : Monitor;
+
   useEffect(() => {
-    const handleKeyPress = (e) => {
-      // ESC to go back
-      if (e.key === "Escape" && showBackButton) {
-        navigate(-1);
-      }
-      // Ctrl/Cmd + K for theme toggle
-      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
-        e.preventDefault();
-        cycleTheme();
-      }
-    };
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [navigate, showBackButton, theme]);
+  useEffect(() => setMobileOpen(false), [location.pathname]);
 
-  const getThemeText = () => {
-    if (theme === "light") return "Light";
-    if (theme === "dark") return "Dark";
-    return "System";
-  };
+  const navLinks = user
+    ? [
+        { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+        { to: "/settings", icon: Settings, label: "Settings" },
+      ]
+    : [];
 
   return (
-    <nav className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-      <div className="max-w-7xl mx-auto px-4 py-2.5">
-        <div className="flex items-center justify-between">
-          
-          {/* LEFT - Back Button + Logo */}
-          <div className="flex items-center gap-3">
-            {showBackButton && (
-              <button
-                onClick={() => navigate(-1)}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
-                title="Go back (ESC)"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-            )}
-            
-            <Link to="/" className="flex items-center gap-2">
-              <span className="text-xl font-bold text-gray-900 dark:text-white">
-                Shortify
-              </span>
-            </Link>
+    <header
+      className={`fixed top-0 inset-x-0 z-50 border-b transition-colors duration-200 ${
+        scrolled
+          ? "bg-white/95 dark:bg-[#111]/95 backdrop-blur-md border-zinc-200 dark:border-zinc-800"
+          : "bg-white dark:bg-[#111111] border-transparent"
+      }`}
+    >
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+          {/* Show only the top icon portion of the logo PNG */}
+          <div className="h-9 w-9 overflow-hidden flex-shrink-0">
+            <img
+              src="/nanoURL_logo.png"
+              alt="nanoURL logo"
+              className="w-[140%] max-w-none -translate-x-[14%] -translate-y-[2%] scale-[1.15]"
+            />
           </div>
+          <div className="flex flex-col leading-tight">
+            <span className="text-base font-bold text-[#0d1f7c] dark:text-white tracking-tight">nanoURL</span>
+            <span className="text-[10px] font-medium text-[#0066bb] dark:text-accent-400 tracking-wide">Shorten. Share. Track.</span>
+          </div>
+        </Link>
 
-          {/* RIGHT - Actions */}
-          <div className="flex items-center gap-2">
-            {/* Theme Toggle - Text Based */}
-            <button
-              onClick={cycleTheme}
-              className="px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300"
-              title="Toggle theme (Ctrl+K)"
+        {/* Desktop nav */}
+        <nav className="hidden sm:flex items-center gap-1">
+          {navLinks.map(({ to, icon: Icon, label }) => (
+            <Link
+              key={to}
+              to={to}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                location.pathname === to
+                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100"
+              }`}
             >
-              {getThemeText()}
+              <Icon className="w-4 h-4" />
+              {label}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Right side */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={cycleTheme}
+            className="btn-icon btn-ghost"
+            title="Toggle theme"
+            aria-label="Toggle theme"
+          >
+            <ThemeIcon className="w-4 h-4" />
+          </button>
+
+          {!user ? (
+            <div className="hidden sm:flex items-center gap-2">
+              <Link to="/login" className="btn-ghost btn text-sm">Sign in</Link>
+              <Link to="/register" className="btn-primary btn text-sm">Get started</Link>
+            </div>
+          ) : (
+            <button
+              onClick={() => { logout(); navigate("/login"); }}
+              className="hidden sm:flex btn-ghost btn text-sm text-zinc-600 dark:text-zinc-400"
+              title="Sign out"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Sign out</span>
             </button>
+          )}
 
-            {!user ? (
-              <>
-                <Link
-                  to="/login"
-                  className="px-4 py-2 font-medium text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400"
-                >
-                  Sign In
-                </Link>
-
-                <Link
-                  to="/register"
-                  className="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-medium"
-                >
-                  Get Started
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link
-                  to="/dashboard"
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
-                    location.pathname === "/dashboard"
-                      ? "bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400"
-                      : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
-                  }`}
-                >
-                  <LayoutDashboard className="w-4 h-4" />
-                  <span className="hidden sm:inline">Dashboard</span>
-                </Link>
-
-                <Link
-                  to="/settings"
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
-                    location.pathname === "/settings"
-                      ? "bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400"
-                      : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
-                  }`}
-                >
-                  <Settings className="w-4 h-4" />
-                  <span className="hidden sm:inline">Settings</span>
-                </Link>
-
-                <span className="hidden md:block text-sm text-gray-600 dark:text-gray-400 px-2 border-l border-gray-200 dark:border-gray-700">
-                  {user.name}
-                </span>
-
-                <button
-                  onClick={() => {
-                    logout();
-                    navigate("/login");
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span className="hidden sm:inline">Logout</span>
-                </button>
-              </>
-            )}
-          </div>
+          {/* Mobile menu toggle */}
+          <button
+            className="sm:hidden btn-icon btn-ghost"
+            onClick={() => setMobileOpen(v => !v)}
+            aria-label="Toggle menu"
+          >
+            {mobileOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+          </button>
         </div>
       </div>
-    </nav>
+
+      {/* Mobile menu */}
+      {mobileOpen && (
+        <div className="sm:hidden border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#111111] px-4 py-3 space-y-1 animate-fade-in">
+          {navLinks.map(({ to, icon: Icon, label }) => (
+            <Link
+              key={to}
+              to={to}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            >
+              <Icon className="w-4 h-4" />
+              {label}
+            </Link>
+          ))}
+          {!user ? (
+            <>
+              <Link to="/login" className="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800">Sign in</Link>
+              <Link to="/register" className="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-accent-600 hover:bg-zinc-100 dark:hover:bg-zinc-800">Get started</Link>
+            </>
+          ) : (
+            <button
+              onClick={() => { logout(); navigate("/login"); }}
+              className="flex w-full items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            >
+              <LogOut className="w-4 h-4" />
+              Sign out
+            </button>
+          )}
+        </div>
+      )}
+    </header>
   );
 };
 

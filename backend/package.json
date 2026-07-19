@@ -1,13 +1,17 @@
 {
-  "name": "url-shortener",
+  "name": "nanourl-backend",
   "version": "1.0.0",
-  "description": "URL_Shortener backend",
+  "description": "nanoURL backend",
   "type": "module",
   "main": "index.js",
   "scripts": {
     "dev": "node --watch index",
+    "start": "node index.js",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "keywords": [],
   "author": "",

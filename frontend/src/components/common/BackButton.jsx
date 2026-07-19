@@ -12,10 +12,7 @@ const BackButton = ({ label = "Back", onClick }) => {
   };
 
   return (
-    <button
-      onClick={handleClick}
-      className="px-4 py-2 rounded-xl bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-    >
+    <button onClick={handleClick} className="btn-secondary btn text-sm">
       ← {label}
     </button>
   );

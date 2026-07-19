@@ -1,6 +1,6 @@
-# Shortify Frontend
+# nanoURL Frontend
 
-The Shortify Frontend is a cutting-edge, highly responsive interface designed for the modern web. Built with React and Vite, it delivers a lightning-fast user experience with smooth transitions and real-time updates. From instant link shortening to detailed analytics visualizations, the frontend provides a polished, intuitive dashboard for managing your digital footprint across all devices.
+The nanoURL Frontend is a cutting-edge, highly responsive interface designed for the modern web. Built with React and Vite, it delivers a lightning-fast user experience with smooth transitions and real-time updates. From instant link shortening to detailed analytics visualizations, the frontend provides a polished, intuitive dashboard for managing your digital footprint across all devices.
 
 ## Features
 

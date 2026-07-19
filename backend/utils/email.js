@@ -30,16 +30,16 @@ export async function sendOTPEmail(toEmail, otpCode) {
             });
         }
 
-        const fromEmail = process.env.SMTP_FROM || '"Shortify Security" <no-reply@shortify.com>';
+        const fromEmail = process.env.SMTP_FROM || '"nanoURL Security" <no-reply@nanourl.com>';
 
         const info = await transporter.sendMail({
             from: fromEmail,
             to: toEmail,
-            subject: "Your Shortify Verification Code",
-            text: `Your Shortify verification code is: ${otpCode}. It expires in 5 minutes.`,
+            subject: "Your nanoURL Verification Code",
+            text: `Your nanoURL verification code is: ${otpCode}. It expires in 5 minutes.`,
             html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; text-align: center;">
-          <h2>Welcome to Shortify!</h2>
+          <h2>Welcome to nanoURL!</h2>
           <p>Please use the following One-Time Password to verify your email address:</p>
           <h1 style="font-size: 40px; letter-spacing: 5px; color: #7c3aed; background: #f3f4f6; padding: 20px; border-radius: 10px; display: inline-block;">${otpCode}</h1>
           <p>This code will expire in <strong>5 minutes</strong>.</p>

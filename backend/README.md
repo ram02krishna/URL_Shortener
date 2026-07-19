@@ -1,6 +1,6 @@
-# Shortify Backend
+# nanoURL Backend
 
-The Shortify Backend is a high-performance, scalable API engine that powers the Shortify URL shortening platform. Architected with Node.js and Express, it provides a robust suite of RESTful services for secure authentication, dynamic URL management, and real-time analytics. Designed for reliability and speed, the backend ensures seamless redirection and data integrity at scale.
+The nanoURL Backend is a high-performance, scalable API engine that powers the nanoURL URL shortening platform. Architected with Node.js and Express, it provides a robust suite of RESTful services for secure authentication, dynamic URL management, and real-time analytics. Designed for reliability and speed, the backend ensures seamless redirection and data integrity at scale.
 
 ## Features
 
@@ -83,4 +83,4 @@ Defined with **Drizzle ORM** for PostgreSQL:
    - `SMTP_PORT` : 587
    - `SMTP_USER` : abc@gmail.com
    - `SMTP_PASS` : Enter SMTP Password
-   - `SMTP_FROM` : Shortify Security
+   - `SMTP_FROM` : nanoURL Security

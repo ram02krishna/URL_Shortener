@@ -1,94 +1,70 @@
 import { Link } from "react-router-dom";
-import { Rocket, TrendingUp, Shield, Zap } from "lucide-react";
 import FreeUrlShortener from "../components/url/FreeUrlShortener";
+
+const features = [
+  {
+    title: "Track every click",
+    description: "See who clicked, from where, and on what device. Real analytics, not just counts.",
+  },
+  {
+    title: "Password-protect links",
+    description: "Add a password to any link. Only people with the right key get through.",
+  },
+  {
+    title: "Set expiry dates",
+    description: "Links that expire on their own. Perfect for time-sensitive campaigns.",
+  },
+];
 
 const Home = () => {
   return (
-    <div className="min-h-[calc(100vh-52px)] lg:h-[calc(100vh-52px)] bg-gray-50 dark:bg-gray-950 flex flex-col overflow-y-auto lg:overflow-hidden transition-colors duration-300">
-
-      {/* Hero Section */}
-      <section className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8 lg:py-3 w-full">
-        <div className="max-w-7xl mx-auto w-full">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            
-            {/* Text Content */}
-            <div className="space-y-6 lg:space-y-4 text-center lg:text-left order-2 lg:order-1">
-              {/* Main Heading */}
-              <div>
-                <h1 className="text-4xl sm:text-5xl lg:text-5xl font-extrabold tracking-tight leading-tight mb-3 text-gray-900 dark:text-white">
-                  Shorten URLs.
-                  <br />
-                  <span className="text-purple-600 dark:text-purple-400">
-                    Amplify Results.
-                  </span>
-                </h1>
-
-                {/* Subtitle */}
-                <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                  Transform endless URLs into powerful, trackable links.
-                  <br className="hidden sm:block" />
-                  Built for marketers, developers, and creators.
-                </p>
-              </div>
-
-              {/* Feature Pills */}
-              <div className="flex flex-wrap justify-center lg:justify-start gap-2">
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full shadow-sm">
-                  <Zap className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
-                  <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Fast</span>
-                </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full shadow-sm">
-                  <Shield className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
-                  <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Secure</span>
-                </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full shadow-sm">
-                  <TrendingUp className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
-                  <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Analytics</span>
-                </div>
-              </div>
-
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-3 w-full sm:w-auto">
-                <Link
-                  to="/register"
-                  className="w-full sm:w-auto px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold text-base flex items-center justify-center gap-2 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30 transition-all"
-                >
-                  Start Free
-                  <Rocket className="w-4 h-4" />
-                </Link>
-                
-                <Link
-                  to="/login"
-                  className="w-full sm:w-auto px-6 py-3 bg-white dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl font-semibold text-base hover:border-purple-500 dark:hover:border-purple-500 transition-all text-center"
-                >
-                  Sign In
-                </Link>
-              </div>
-            </div>
-
-            {/* URL Shortener Form */}
-            <div className="w-full order-1 lg:order-2 mb-8 lg:mb-0">
-              <FreeUrlShortener />
-            </div>
-
+    <div className="min-h-screen flex flex-col">
+      {/* Hero */}
+      <section className="flex-1 flex items-center justify-center px-4 py-20 sm:py-28">
+        <div className="max-w-2xl mx-auto w-full text-center space-y-8 animate-slide-up">
+          <div className="space-y-4">
+            <h1 className="text-4xl sm:text-5xl font-bold text-zinc-900 dark:text-zinc-50 leading-tight tracking-tight">
+              Short links that{" "}
+              <span className="text-accent-600">actually tell you something</span>
+            </h1>
+            <p className="text-lg text-zinc-500 dark:text-zinc-400 max-w-xl mx-auto leading-relaxed">
+              nanoURL turns long links into clean, trackable ones. See who clicks, block with passwords, or set them to expire — all from one simple dashboard.
+            </p>
           </div>
+
+          {/* Free shortener inline */}
+          <div className="card p-5 text-left">
+            <FreeUrlShortener />
+          </div>
+
+          {/* Auth links */}
+          <p className="text-sm text-zinc-400 dark:text-zinc-500">
+            Want unlimited links and analytics?{" "}
+            <Link to="/register" className="text-accent-600 hover:underline font-medium">
+              Create a free account
+            </Link>
+            {" "}or{" "}
+            <Link to="/login" className="text-accent-600 hover:underline font-medium">
+              sign in
+            </Link>
+          </p>
         </div>
       </section>
 
-      {/* Social Proof Section */}
-      <section className="py-4 px-6 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shrink-0">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center">
-            <p className="text-gray-500 dark:text-gray-400 mb-3 text-xs font-semibold tracking-wide uppercase">
-              Trusted by professionals at
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
-              <div className="text-lg md:text-xl font-bold text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors">Google</div>
-              <div className="text-lg md:text-xl font-bold text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors">Microsoft</div>
-              <div className="text-lg md:text-xl font-bold text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors">Amazon</div>
-              <div className="text-lg md:text-xl font-bold text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors">Meta</div>
-              <div className="text-lg md:text-xl font-bold text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors">Netflix</div>
-            </div>
+      {/* Features */}
+      <section className="border-t border-zinc-200 dark:border-zinc-800 px-4 py-16">
+        <div className="max-w-3xl mx-auto">
+          <div className="grid sm:grid-cols-3 gap-8">
+            {features.map((feat) => (
+              <div key={feat.title} className="space-y-2">
+                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                  {feat.title}
+                </h3>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                  {feat.description}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

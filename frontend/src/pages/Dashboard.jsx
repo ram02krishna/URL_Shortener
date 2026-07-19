@@ -1,30 +1,25 @@
 import { useEffect, useState, useCallback } from "react";
 import toast from "react-hot-toast";
 import {
-  Copy, Trash2, ExternalLink, Plus, TrendingUp,
-  Link as LinkIcon, BarChart3, Loader2, Clock, ChevronDown,
-  X, Globe, Monitor, Smartphone, MousePointerClick, Users,
-  RefreshCw, MapPin, Network, QrCode, Lock
+  Copy, Trash2, ExternalLink, Plus, BarChart2,
+  Link as LinkIcon, Loader2, Clock, ChevronDown,
+  X, MousePointerClick, Users, RefreshCw,
+  QrCode, Lock, AlertTriangle
 } from "lucide-react";
 import { createShortUrl, getUserUrls, deleteUrl, getUrlAnalytics } from "../services/url.service";
 import QRCode from "react-qr-code";
 
-// Constants
 const EXPIRY_OPTIONS = [
   { label: "No expiry", value: null },
   { label: "1 hour", value: 1 * 60 * 60 * 1000 },
   { label: "24 hours", value: 24 * 60 * 60 * 1000 },
   { label: "7 days", value: 7 * 24 * 60 * 60 * 1000 },
   { label: "30 days", value: 30 * 24 * 60 * 60 * 1000 },
-  { label: "Custom…", value: "custom" },
+  { label: "Custom", value: "custom" },
 ];
 
-function isExpired(expiresAt) {
-  if (!expiresAt) return false;
-  return new Date() > new Date(expiresAt);
-}
+const isExpired = (expiresAt) => expiresAt && new Date() > new Date(expiresAt);
 
-// Dashboard Component
 const Dashboard = () => {
   const [urls, setUrls] = useState([]);
   const [originalUrl, setOriginalUrl] = useState("");
@@ -39,13 +34,9 @@ const Dashboard = () => {
 
   useEffect(() => {
     getUserUrls()
-      .then((res) => setUrls(res.data.codes || []))
-      .catch(() => toast.error("Failed to load URLs"));
+      .then(res => setUrls(res.data.codes || []))
+      .catch(() => toast.error("Failed to load links"));
   }, []);
-
-  const activeCount = urls.filter((u) => !isExpired(u.expiresAt)).length;
-
-  const selectedLabel = EXPIRY_OPTIONS.find((o) => o.value === expiryOption)?.label ?? "No expiry";
 
   const submit = async (e) => {
     e.preventDefault();
@@ -53,7 +44,7 @@ const Dashboard = () => {
 
     let expiresAt = null;
     if (expiryOption === "custom") {
-      if (!customDate) { toast.error("Please pick a custom expiry date/time."); return; }
+      if (!customDate) { toast.error("Please pick an expiry date"); return; }
       expiresAt = new Date(customDate).toISOString();
     } else if (expiryOption) {
       expiresAt = new Date(Date.now() + expiryOption).toISOString();
@@ -70,297 +61,256 @@ const Dashboard = () => {
       setExpiryOption(null);
       setCustomDate("");
       setPassword("");
-      toast.success("Short URL created!");
+      toast.success("Link created!");
     } catch {
-      toast.error("Failed to shorten URL");
+      toast.error("Failed to create link");
     } finally {
       setLoading(false);
     }
   };
 
-  const copyToClipboard = (shortCode) => {
+  const copy = (shortCode) => {
     navigator.clipboard.writeText(`${import.meta.env.VITE_BACKEND_URL}/${shortCode}`);
-    toast.success("Copied to clipboard!");
+    toast.success("Copied!");
   };
 
   const handleDelete = async (id) => {
     try {
       await deleteUrl(id);
-      setUrls(urls.filter((u) => u.id !== id));
+      setUrls(urls.filter(u => u.id !== id));
       setDeleteConfirm(null);
-      toast.success("URL deleted!");
+      toast.success("Deleted");
     } catch {
-      toast.error("Failed to delete URL");
+      toast.error("Failed to delete");
     }
   };
 
+  const selectedLabel = EXPIRY_OPTIONS.find(o => o.value === expiryOption)?.label ?? "No expiry";
+  const activeCount = urls.filter(u => !isExpired(u.expiresAt)).length;
+
   return (
     <div
-      className="h-[calc(100vh-52px)] bg-gray-50 dark:bg-gray-950 flex flex-col transition-colors duration-300"
+      className="min-h-screen pt-14"
       onClick={() => setShowExpiryDropdown(false)}
     >
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 py-4 flex-1 flex flex-col overflow-hidden">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
 
-        {/* HEADER & STATS */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+        {/* Page header */}
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Manage your URLs</p>
-          </div>
-          <div className="flex items-center gap-4 sm:gap-6 overflow-x-auto pb-2 sm:pb-0 no-scrollbar">
-            <StatItem icon={<LinkIcon className="w-5 h-5" />} label="Total" value={urls.length} />
-            <StatItem icon={<TrendingUp className="w-5 h-5" />} label="Active" value={activeCount} />
-            <StatItem icon={<BarChart3 className="w-5 h-5" />} label="Clicks" value="—" />
+            <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">Links</h1>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
+              {urls.length} total · {activeCount} active
+            </p>
           </div>
         </div>
 
-        {/* CREATE URL FORM */}
-        <form onSubmit={submit} className="mb-6">
-          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 shadow-sm">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="url"
-                value={originalUrl}
-                onChange={(e) => setOriginalUrl(e.target.value)}
-                placeholder="Enter your long URL here..."
-                className="flex-1 px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                disabled={loading}
-                required
-              />
+        {/* Create form */}
+        <form onSubmit={submit} onClick={e => e.stopPropagation()} className="card p-4 mb-6">
+          {/* URL input row */}
+          <div className="flex gap-2">
+            <input
+              type="url"
+              value={originalUrl}
+              onChange={e => setOriginalUrl(e.target.value)}
+              placeholder="Paste a long URL to shorten…"
+              className="input flex-1 text-sm min-w-0"
+              disabled={loading}
+              required
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary btn text-sm shrink-0 px-4"
+            >
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Plus className="w-4 h-4" /><span className="hidden xs:inline">Create</span></>}
+            </button>
+          </div>
 
-              {/* Expiry picker */}
-              <div className="relative" onClick={(e) => e.stopPropagation()}>
-                <button
-                  type="button"
-                  onClick={() => setShowExpiryDropdown((v) => !v)}
-                  disabled={loading}
-                  className="w-full sm:w-auto flex items-center gap-2 px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 hover:border-purple-400 dark:hover:border-purple-500 focus:outline-none text-sm font-medium disabled:opacity-50 transition-all"
-                >
-                  <Clock className="w-4 h-4 text-purple-500" />
-                  <span>{selectedLabel}</span>
-                  <ChevronDown className={`w-4 h-4 transition-transform ${showExpiryDropdown ? "rotate-180" : ""}`} />
-                </button>
-                {showExpiryDropdown && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-20 overflow-hidden">
-                    {EXPIRY_OPTIONS.map((opt) => (
-                      <button
-                        key={String(opt.value)}
-                        type="button"
-                        onClick={() => { setExpiryOption(opt.value); setShowExpiryDropdown(false); }}
-                        className={`w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-600 dark:hover:text-purple-400 ${expiryOption === opt.value ? "bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 font-semibold" : "text-gray-700 dark:text-gray-300"}`}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
+          {/* Advanced options row */}
+          <div className="mt-2 flex flex-col sm:flex-row gap-2">
+            {/* Expiry picker */}
+            <div className="relative shrink-0" onClick={e => e.stopPropagation()}>
               <button
-                type="submit"
+                type="button"
+                onClick={() => setShowExpiryDropdown(v => !v)}
+                className="btn-secondary btn text-sm w-full sm:w-auto gap-2"
                 disabled={loading}
-                className="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium flex items-center justify-center gap-2 disabled:opacity-50 transition-all shadow-lg shadow-purple-500/20"
               >
-                {loading ? <><Loader2 className="w-5 h-5 animate-spin" /><span>Creating...</span></> : <><Plus className="w-5 h-5" /><span>Shorten</span></>}
+                <Clock className="w-3.5 h-3.5 text-zinc-400" />
+                {selectedLabel}
+                <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform ${showExpiryDropdown ? "rotate-180" : ""}`} />
               </button>
-            </div>
-
-            <div className="mt-3 flex flex-col sm:flex-row gap-3">
-              <div className="flex-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-4 w-4 text-gray-400" aria-hidden="true" />
+              {showExpiryDropdown && (
+                <div className="absolute left-0 bottom-full mb-1.5 sm:bottom-auto sm:top-full sm:mt-1.5 w-44 card shadow-lg z-20 py-1">
+                  {EXPIRY_OPTIONS.map(opt => (
+                    <button
+                      key={String(opt.value)}
+                      type="button"
+                      onClick={() => { setExpiryOption(opt.value); setShowExpiryDropdown(false); }}
+                      className={`w-full text-left px-3 py-2.5 text-sm transition-colors ${
+                        expiryOption === opt.value
+                          ? "bg-accent-50 text-accent-700 dark:bg-accent-900/20 dark:text-accent-300 font-medium"
+                          : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
                 </div>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Optional: Set a password to protect this link"
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                  disabled={loading}
-                />
-              </div>
+              )}
             </div>
 
+            <div className="relative flex-1">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400 pointer-events-none" />
+              <input
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="Optional password"
+                className="input text-sm pl-9"
+                disabled={loading}
+              />
+            </div>
             {expiryOption === "custom" && (
-              <div className="mt-3 flex items-center gap-3">
-                <label className="text-sm font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Expires on:</label>
-                <input
-                  type="datetime-local"
-                  value={customDate}
-                  min={new Date(Date.now() + 60000).toISOString().slice(0, 16)}
-                  onChange={(e) => setCustomDate(e.target.value)}
-                  className="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-              </div>
+              <input
+                type="datetime-local"
+                value={customDate}
+                min={new Date(Date.now() + 60000).toISOString().slice(0, 16)}
+                onChange={e => setCustomDate(e.target.value)}
+                className="input text-sm flex-1"
+              />
             )}
           </div>
         </form>
 
-        {/* URLS LIST */}
-        <div className="flex-1 overflow-hidden">
-          <div className="h-full overflow-y-auto pr-1 sm:pr-2">
-            {urls.length === 0 ? (
-              <EmptyState />
-            ) : (
-              <div className="space-y-3 pb-4">
-                {urls.map((url) => (
-                  <URLCard
-                    key={url.id}
-                    url={url}
-                    onCopy={copyToClipboard}
-                    onDelete={() => setDeleteConfirm(url.id)}
-                    onAnalytics={() => setAnalyticsUrl(url)}
-                    onQrCode={() => setQrCodeUrl(url)}
-                  />
-                ))}
-              </div>
-            )}
+        {/* Links list */}
+        {urls.length === 0 ? (
+          <div className="card p-12 text-center">
+            <LinkIcon className="w-8 h-8 text-zinc-300 dark:text-zinc-600 mx-auto mb-3" />
+            <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">No links yet</p>
+            <p className="text-sm text-zinc-400 dark:text-zinc-500 mt-1">Create your first link above.</p>
           </div>
-        </div>
+        ) : (
+          <div className="space-y-2">
+            {urls.map(url => (
+              <URLRow
+                key={url.id}
+                url={url}
+                onCopy={copy}
+                onDelete={() => setDeleteConfirm(url.id)}
+                onAnalytics={() => setAnalyticsUrl(url)}
+                onQrCode={() => setQrCodeUrl(url)}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
+      {/* Modals */}
       {deleteConfirm && (
-        <DeleteConfirmModal
+        <DeleteModal
           onConfirm={() => handleDelete(deleteConfirm)}
           onCancel={() => setDeleteConfirm(null)}
         />
       )}
-
       {analyticsUrl && (
-        <AnalyticsModal
-          url={analyticsUrl}
-          onClose={() => setAnalyticsUrl(null)}
-        />
+        <AnalyticsModal url={analyticsUrl} onClose={() => setAnalyticsUrl(null)} />
       )}
-
       {qrCodeUrl && (
-        <QRCodeModal
-          url={qrCodeUrl}
-          onClose={() => setQrCodeUrl(null)}
-        />
+        <QRModal url={qrCodeUrl} onClose={() => setQrCodeUrl(null)} />
       )}
     </div>
   );
 };
 
-// Subcomponents
+// ── Sub-components ──────────────────────────────────────────
 
-const StatItem = ({ icon, label, value }) => (
-  <div className="flex items-center gap-3 bg-white dark:bg-gray-900 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-800 shrink-0 shadow-sm">
-    <div className="text-purple-600 dark:text-purple-400">{icon}</div>
-    <div>
-      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">{label}</p>
-      <p className="text-lg font-bold text-gray-900 dark:text-white leading-none">{value}</p>
-    </div>
-  </div>
-);
-
-const ExpiryBadge = ({ expiresAt }) => {
-  const [now, setNow] = useState(Date.now());
-
+const ExpiryLabel = ({ expiresAt }) => {
+  const [, setTick] = useState(0);
   useEffect(() => {
     if (!expiresAt) return;
-    const interval = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(interval);
+    const id = setInterval(() => setTick(t => t + 1), 1000);
+    return () => clearInterval(id);
   }, [expiresAt]);
 
   if (!expiresAt) return null;
+  const diffMs = new Date(expiresAt) - Date.now();
+  if (diffMs <= 0) return <span className="badge-red">Expired</span>;
 
-  const diffMs = new Date(expiresAt).getTime() - now;
+  const d = Math.floor(diffMs / 86400000);
+  const h = Math.floor((diffMs % 86400000) / 3600000);
+  const m = Math.floor((diffMs % 3600000) / 60000);
+  const s = Math.floor((diffMs % 60000) / 1000);
 
-  if (diffMs <= 0) {
-    return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-semibold">
-        <Clock className="w-3 h-3" />Expired
-      </span>
-    );
-  }
-
-  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
-  const minutes = Math.floor((diffMs / 1000 / 60) % 60);
-  const seconds = Math.floor((diffMs / 1000) % 60);
-
-  const parts = [];
-  if (days > 0) parts.push(`${days}d`);
-  if (hours > 0 || days > 0) parts.push(`${hours}h`);
-  if (minutes > 0 || hours > 0 || days > 0) parts.push(`${minutes}m`);
-  parts.push(`${seconds}s`);
-
-  const label = parts.join(' ');
+  const label = d > 0 ? `${d}d ${h}h` : h > 0 ? `${h}h ${m}m` : `${m}m ${s}s`;
   const urgent = diffMs < 3600000;
 
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${urgent ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400" : "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"}`}>
-      <Clock className="w-3 h-3" />Expires in {label}
+    <span className={urgent ? "badge-amber" : "badge-green"}>
+      <Clock className="w-3 h-3" />
+      {label}
     </span>
   );
 };
 
-const URLCard = ({ url, onCopy, onDelete, onAnalytics, onQrCode }) => {
+const URLRow = ({ url, onCopy, onDelete, onAnalytics, onQrCode }) => {
   const shortUrl = `${import.meta.env.VITE_BACKEND_URL}/${url.shortCode}`;
   const expired = isExpired(url.expiresAt);
 
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-lg border p-4 transition-all shadow-sm ${expired ? "border-red-200 dark:border-red-900/50 opacity-75" : "border-gray-200 dark:border-gray-800 hover:border-purple-300 dark:hover:border-purple-700"}`}>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div className={`card p-3 sm:p-4 transition-opacity ${expired ? "opacity-50" : ""}`}>
+      <div className="flex items-start gap-3">
+        {/* Link info */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            {url.hasPassword && <Lock className="w-3.5 h-3.5 text-purple-500 shrink-0" title="Password Protected" />}
-            <p className="text-sm text-gray-500 dark:text-gray-400 truncate font-medium">{url.targetURL}</p>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <button
-              onClick={() => !expired && onCopy(url.shortCode)}
-              disabled={expired}
-              className={`text-base font-bold transition-colors ${expired ? "text-gray-400 dark:text-gray-600 cursor-not-allowed line-through" : "text-purple-600 dark:text-purple-400 hover:underline"}`}
-              title={expired ? "This link has expired" : "Click to copy"}
-            >
-              /{url.shortCode}
-            </button>
-            {!expired && (
-              <a href={shortUrl} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors" title="Open in new tab">
-                <ExternalLink className="w-4 h-4" />
-              </a>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-sm font-mono font-medium text-accent-600 dark:text-accent-400 truncate max-w-[200px] sm:max-w-none">
+              {shortUrl.replace(/^https?:\/\//, "")}
+            </span>
+            {url.hasPassword && (
+              <span className="badge-zinc"><Lock className="w-3 h-3" />Protected</span>
             )}
-            <ExpiryBadge expiresAt={url.expiresAt} />
+            <ExpiryLabel expiresAt={url.expiresAt} />
           </div>
+          <p className="text-xs text-zinc-400 dark:text-zinc-500 truncate mt-0.5">
+            {url.targetURL}
+          </p>
         </div>
 
-        <div className="flex items-center gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100 dark:border-gray-800">
-          {/* Analytics button */}
-          <button
-            onClick={onAnalytics}
-            className="flex-1 sm:flex-none justify-center px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 font-medium text-sm flex items-center gap-2 transition-colors"
-            title="View Analytics"
-          >
-            <BarChart3 className="w-4 h-4" />
-            <span className="sm:inline">Stats</span>
-          </button>
-
-          <button
-            onClick={onQrCode}
-            className="flex-1 sm:flex-none justify-center px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 font-medium text-sm flex items-center gap-2 transition-colors"
-            title="View QR Code"
-          >
-            <QrCode className="w-4 h-4" />
-            <span className="sm:inline">QR</span>
-          </button>
-
+        {/* Action buttons — always visible, larger tap targets on mobile */}
+        <div className="flex items-center gap-0.5 shrink-0 -mr-1">
+          {!expired && (
+            <a
+              href={shortUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="btn-icon btn-ghost p-2.5"
+              title="Open"
+            >
+              <ExternalLink className="w-4 h-4" />
+            </a>
+          )}
           {!expired && (
             <button
               onClick={() => onCopy(url.shortCode)}
-              className="flex-1 sm:flex-none justify-center px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 font-medium text-sm flex items-center gap-2 transition-colors"
+              className="btn-icon btn-ghost p-2.5"
+              title="Copy"
             >
-              <Copy className="w-4 h-4" /><span className="sm:inline">Copy</span>
+              <Copy className="w-4 h-4" />
             </button>
           )}
-
+          <button onClick={onAnalytics} className="btn-icon btn-ghost p-2.5" title="Analytics">
+            <BarChart2 className="w-4 h-4" />
+          </button>
+          <button onClick={onQrCode} className="btn-icon btn-ghost p-2.5" title="QR Code">
+            <QrCode className="w-4 h-4" />
+          </button>
           <button
             onClick={onDelete}
-            className="flex-1 sm:flex-none justify-center px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 font-medium text-sm flex items-center gap-2 transition-colors"
+            className="btn-icon btn-ghost p-2.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+            title="Delete"
           >
-            <Trash2 className="w-4 h-4" /><span className="sm:inline">Delete</span>
+            <Trash2 className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -368,351 +318,221 @@ const URLCard = ({ url, onCopy, onDelete, onAnalytics, onQrCode }) => {
   );
 };
 
-// Analytics Modal
+// ── Modals ──────────────────────────────────────────────────
+
+const Modal = ({ onClose, children, width = "max-w-md" }) => {
+  useEffect(() => {
+    const handler = e => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handler);
+    // Prevent body scroll when modal is open
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", handler);
+      document.body.style.overflow = "";
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/40 backdrop-blur-[2px]"
+      onClick={onClose}
+    >
+      <div
+        className={`card shadow-xl w-full ${width} animate-slide-up-sheet sm:animate-slide-up max-h-[92dvh] sm:max-h-[90vh] overflow-hidden flex flex-col rounded-t-2xl rounded-b-none sm:rounded-xl`}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Drag handle — only shown on mobile */}
+        <div className="flex justify-center pt-2.5 pb-0 sm:hidden">
+          <div className="w-9 h-1 rounded-full bg-zinc-300 dark:bg-zinc-600" />
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+};
+
+const DeleteModal = ({ onConfirm, onCancel }) => (
+  <Modal onClose={onCancel} width="max-w-sm">
+    <div className="p-5">
+      <div className="flex items-start gap-3 mb-4">
+        <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg shrink-0">
+          <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
+        </div>
+        <div>
+          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Delete this link?</h3>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+            This cannot be undone. The short link will stop working.
+          </p>
+        </div>
+      </div>
+      <div className="flex gap-2 justify-end">
+        <button onClick={onCancel} className="btn-secondary btn btn-sm">Cancel</button>
+        <button onClick={onConfirm} className="btn-danger btn btn-sm">Delete</button>
+      </div>
+    </div>
+  </Modal>
+);
+
 const AnalyticsModal = ({ url, onClose }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  const fetch = useCallback(async () => {
+    setLoading(true); setError(null);
     try {
       const res = await getUrlAnalytics(url.id);
       setData(res.data);
     } catch {
-      setError("Failed to load analytics.");
+      setError("Failed to load analytics");
     } finally {
       setLoading(false);
     }
   }, [url.id]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
-
-  // Close on Escape
-  useEffect(() => {
-    const handler = (e) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [onClose]);
+  useEffect(() => { fetch(); }, [fetch]);
 
   return (
-    <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-          <div className="min-w-0 flex-1">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-purple-500" />
-              Analytics
-            </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 font-mono truncate mt-0.5">
-              /{url.shortCode}
-            </p>
-          </div>
-          <div className="flex items-center gap-2 ml-4">
-            <button
-              onClick={fetchData}
-              className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              title="Refresh"
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-            </button>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+    <Modal onClose={onClose} width="max-w-2xl">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-200 dark:border-zinc-800">
+        <div>
+          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+            <BarChart2 className="w-4 h-4 text-zinc-500" />
+            Analytics
+          </h3>
+          <p className="text-xs font-mono text-zinc-400 mt-0.5">{`/${url.shortCode}`}</p>
         </div>
+        <div className="flex items-center gap-1.5">
+          <button onClick={fetch} className="btn-icon btn-ghost" title="Refresh">
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+          </button>
+          <button onClick={onClose} className="btn-icon btn-ghost">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
 
-        {/* Body */}
-        <div className="overflow-y-auto flex-1 p-6">
-          {loading && (
-            <div className="flex flex-col items-center justify-center py-16 gap-3 text-gray-400">
-              <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
-              <p className="text-sm">Loading analytics…</p>
-            </div>
-          )}
-
-          {error && !loading && (
-            <div className="text-center py-12 text-red-500">
-              <p>{error}</p>
-              <button onClick={fetchData} className="mt-3 text-sm underline">Retry</button>
-            </div>
-          )}
-
-          {data && !loading && (
-            <div className="space-y-6">
-              {/* Summary Cards */}
-              <div className="grid grid-cols-2 gap-3">
-                <StatCard
-                  icon={<MousePointerClick className="w-5 h-5" />}
-                  label="Total Clicks"
-                  value={data.totalClicks}
-                  color="purple"
-                />
-                <StatCard
-                  icon={<Users className="w-5 h-5" />}
-                  label="Unique Visitors"
-                  value={data.uniqueClicks}
-                  color="indigo"
-                />
-              </div>
-
-              {/* Visitor IP Log */}
-              {data.visitorIps?.length > 0 && (
-                <Section title="Visitor Log" icon={<Network className="w-4 h-4" />}>
-                  <VisitorTable rows={data.visitorIps} />
-                </Section>
-              )}
-
-              {data.totalClicks === 0 && (
-                <div className="text-center py-10 text-gray-400">
-                  <MousePointerClick className="w-10 h-10 mx-auto mb-3 opacity-40" />
-                  <p className="font-medium">No clicks yet</p>
-                  <p className="text-sm mt-1">Share your link to start seeing stats here.</p>
+      <div className="p-4 sm:p-5 overflow-y-auto flex-1">
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-6 h-6 animate-spin text-zinc-400" />
+          </div>
+        )}
+        {error && !loading && (
+          <div className="text-center py-8">
+            <p className="text-sm text-red-500">{error}</p>
+            <button onClick={fetch} className="btn-secondary btn btn-sm mt-3">Try again</button>
+          </div>
+        )}
+        {data && !loading && (
+          <div className="space-y-6">
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: "Total clicks", value: data.totalClicks, icon: MousePointerClick },
+                { label: "Unique visitors", value: data.uniqueClicks, icon: Users },
+              ].map(({ label, value, icon: Icon }) => (
+                <div key={label} className="bg-zinc-50 dark:bg-zinc-800 rounded-xl p-4">
+                  <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 mb-1.5">
+                    <Icon className="w-4 h-4" />
+                    <span className="text-xs font-medium">{label}</span>
+                  </div>
+                  <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">{value?.toLocaleString() ?? 0}</p>
                 </div>
-              )}
+              ))}
             </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
 
-// Analytics sub-components
-
-const StatCard = ({ icon, label, value, color }) => {
-  const colors = {
-    purple: "bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400",
-    indigo: "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400",
-  };
-  return (
-    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 flex items-center gap-4">
-      <div className={`p-2.5 rounded-xl ${colors[color]}`}>{icon}</div>
-      <div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">{label}</p>
-        <p className="text-2xl font-bold text-gray-900 dark:text-white">{value.toLocaleString()}</p>
-      </div>
-    </div>
-  );
-};
-
-const Section = ({ title, icon, children }) => (
-  <div>
-    <h4 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2 flex items-center gap-1.5">
-      {icon}{title}
-    </h4>
-    {children}
-  </div>
-);
-
-const BarList = ({ items, total }) => {
-  const max = Math.max(...items.map((i) => Number(i.count)), 1);
-  return (
-    <div className="space-y-2">
-      {items.map((item, i) => {
-        const pct = Math.round((Number(item.count) / total) * 100);
-        const fill = Math.round((Number(item.count) / max) * 100);
-        return (
-          <div key={i} className="flex items-center gap-2 text-sm">
-            <span className="w-24 truncate text-gray-600 dark:text-gray-400 text-xs font-medium shrink-0">
-              {item.label ?? "Unknown"}
-            </span>
-            <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-2 overflow-hidden">
-              <div
-                className="h-2 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 transition-all duration-500"
-                style={{ width: `${fill}%` }}
-              />
-            </div>
-            <span className="w-9 text-right text-xs text-gray-500 dark:text-gray-400 font-mono shrink-0">
-              {pct}%
-            </span>
-          </div>
-        );
-      })}
-    </div>
-  );
-};
-
-const SparkBar = ({ data }) => {
-  const max = Math.max(...data.map((d) => Number(d.count)), 1);
-  return (
-    <div className="flex items-end gap-1 h-16">
-      {data.map((d, i) => {
-        const h = Math.max(Math.round((Number(d.count) / max) * 100), 4);
-        return (
-          <div key={i} className="flex-1 group relative flex flex-col items-center justify-end h-full">
-            <div
-              className="w-full rounded-sm bg-purple-500/80 hover:bg-purple-500 transition-all cursor-default"
-              style={{ height: `${h}%` }}
-            />
-            {/* Tooltip */}
-            <div className="absolute bottom-full mb-1 hidden group-hover:flex flex-col items-center z-10 pointer-events-none">
-              <div className="bg-gray-900 dark:bg-gray-700 text-white text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg">
-                {String(d.date).slice(5)}: {d.count}
+            {/* Visitor table */}
+            {data.visitorIps?.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">
+                  Visitor log
+                </p>
+                <div className="border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
+                        {["IP", "Browser", "OS", "Device", "Time"].map(h => (
+                          <th key={h} className="text-left px-3 py-2 font-medium text-zinc-500 dark:text-zinc-400 whitespace-nowrap">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                      {data.visitorIps.map((row, i) => {
+                        const ts = row.clickedAt ? new Date(row.clickedAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "—";
+                        return (
+                          <tr key={i} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
+                            <td className="px-3 py-2 font-mono text-zinc-600 dark:text-zinc-400 whitespace-nowrap">{row.ip ?? "—"}</td>
+                            <td className="px-3 py-2 text-zinc-600 dark:text-zinc-400 whitespace-nowrap">{row.browser ?? "—"}</td>
+                            <td className="px-3 py-2 text-zinc-600 dark:text-zinc-400 whitespace-nowrap">{row.os ?? "—"}</td>
+                            <td className="px-3 py-2 whitespace-nowrap">
+                              <span className="badge-zinc">{row.device ?? "—"}</span>
+                            </td>
+                            <td className="px-3 py-2 text-zinc-400 whitespace-nowrap">{ts}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
+            )}
+
+            {data.totalClicks === 0 && (
+              <div className="text-center py-8 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl">
+                <MousePointerClick className="w-8 h-8 text-zinc-300 dark:text-zinc-600 mx-auto mb-2" />
+                <p className="text-sm text-zinc-500">No clicks recorded yet</p>
+              </div>
+            )}
           </div>
-        );
-      })}
-    </div>
-  );
-};
-
-// Visitor IP Table
-const VisitorTable = ({ rows }) => {
-  const fmt = (ts) => {
-    if (!ts) return "—";
-    const d = new Date(ts);
-    return d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
-  };
-
-  return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
-      <table className="w-full text-xs">
-        <thead>
-          <tr className="bg-gray-50 dark:bg-gray-800 text-left">
-            {["IP Address", "Location (Lat, Lon)", "Browser", "OS", "Device", "Time"].map((h) => (
-              <th key={h} className="px-3 py-2 font-semibold text-gray-600 dark:text-gray-400 whitespace-nowrap">{h}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-          {rows.map((row, i) => (
-            <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-              <td className="px-3 py-2 font-mono text-purple-600 dark:text-purple-400 whitespace-nowrap">
-                {row.ip ?? "—"}
-              </td>
-              <td className="px-3 py-2 text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                {row.latitude && row.longitude ? `${row.latitude}, ${row.longitude}` : "Unknown"}
-              </td>
-              <td className="px-3 py-2 text-gray-700 dark:text-gray-300 whitespace-nowrap">{row.browser ?? "—"}</td>
-              <td className="px-3 py-2 text-gray-700 dark:text-gray-300 whitespace-nowrap">{row.os ?? "—"}</td>
-              <td className="px-3 py-2">
-                <span className={`px-1.5 py-0.5 rounded-full font-medium ${row.device === "Mobile" ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" :
-                  row.device === "Tablet" ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400" :
-                    "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
-                  }`}>{row.device ?? "—"}</span>
-              </td>
-              <td className="px-3 py-2 text-gray-400 whitespace-nowrap">{fmt(row.clickedAt)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-};
-
-// Other Components
-const EmptyState = () => (
-  <div className="bg-white dark:bg-gray-900 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700 p-8 sm:p-12 text-center h-full flex flex-col items-center justify-center">
-    <div className="text-5xl mb-4">🔗</div>
-    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No links yet</h3>
-    <p className="text-gray-600 dark:text-gray-400 max-w-xs mx-auto">Create your first short link using the form above</p>
-  </div>
-);
-
-const DeleteConfirmModal = ({ onConfirm, onCancel }) => (
-  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 max-w-sm w-full shadow-2xl">
-      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Delete URL?</h3>
-      <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-        This action cannot be undone. The short link will stop working immediately.
-      </p>
-      <div className="flex gap-3">
-        <button onClick={onCancel} className="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">Cancel</button>
-        <button onClick={onConfirm} className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors">Delete</button>
+        )}
       </div>
-    </div>
-  </div>
-);
+    </Modal>
+  );
+};
 
-const QRCodeModal = ({ url, onClose }) => {
+const QRModal = ({ url, onClose }) => {
   const shortUrl = `${import.meta.env.VITE_BACKEND_URL}/${url.shortCode}`;
 
-  // Close on Escape
-  useEffect(() => {
-    const handler = (e) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [onClose]);
-
-  const downloadQrCode = () => {
-    const svg = document.getElementById("qr-code-svg");
+  const download = () => {
+    const svg = document.getElementById("qr-svg");
     if (!svg) return;
-    const svgData = new XMLSerializer().serializeToString(svg);
+    const data = new XMLSerializer().serializeToString(svg);
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     const img = new Image();
     img.onload = () => {
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.fillStyle = "white";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      canvas.width = img.width; canvas.height = img.height;
+      ctx.fillStyle = "white"; ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0);
-      const pngFile = canvas.toDataURL("image/png");
-      const downloadLink = document.createElement("a");
-      downloadLink.download = `QR-${url.shortCode}.png`;
-      downloadLink.href = pngFile;
-      downloadLink.click();
+      const a = document.createElement("a");
+      a.download = `qr-${url.shortCode}.png`;
+      a.href = canvas.toDataURL("image/png");
+      a.click();
     };
-    img.src = "data:image/svg+xml;base64," + btoa(svgData);
+    img.src = "data:image/svg+xml;base64," + btoa(data);
   };
 
   return (
-    <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl w-full max-w-sm overflow-hidden flex flex-col p-6 text-center"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <QrCode className="w-5 h-5 text-emerald-500" />
-            QR Code
-          </h3>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+    <Modal onClose={onClose} width="max-w-xs">
+      <div className="p-5 flex flex-col items-center gap-5">
+        <div className="flex items-center justify-between w-full">
+          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">QR Code</h3>
+          <button onClick={onClose} className="btn-icon btn-ghost"><X className="w-4 h-4" /></button>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-gray-200 dark:border-gray-200 mx-auto w-fit shadow-sm">
-          <QRCode
-            id="qr-code-svg"
-            value={shortUrl}
-            size={200}
-            className="rounded"
-          />
+        <div className="bg-white p-4 rounded-xl border border-zinc-200">
+          <QRCode id="qr-svg" value={shortUrl} size={180} />
         </div>
 
-        <p className="mt-6 mb-6 text-sm text-gray-500 dark:text-gray-400 font-mono break-all px-2 bg-gray-50 dark:bg-gray-800 py-2 rounded-lg border border-gray-100 dark:border-gray-800">
-          {shortUrl}
-        </p>
+        <p className="text-xs font-mono text-zinc-500 text-center break-all px-2">{shortUrl}</p>
 
-        <button
-          onClick={downloadQrCode}
-          className="w-full px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2"
-        >
+        <button onClick={download} className="btn-secondary btn w-full text-sm">
           <QrCode className="w-4 h-4" />
           Download PNG
         </button>
       </div>
-    </div>
+    </Modal>
   );
 };
 
