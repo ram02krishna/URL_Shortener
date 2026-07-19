@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { createShortUrl, getUserUrls, deleteUrl, getUrlAnalytics } from "../services/url.service";
 import QRCode from "react-qr-code";
+import { getShortUrl } from "../utils/urlFormat";
 
 const EXPIRY_OPTIONS = [
   { label: "No expiry", value: null },
@@ -70,7 +71,7 @@ const Dashboard = () => {
   };
 
   const copy = (shortCode) => {
-    navigator.clipboard.writeText(`${import.meta.env.VITE_BACKEND_URL}/${shortCode}`);
+    navigator.clipboard.writeText(getShortUrl(shortCode));
     toast.success("Copied!");
   };
 
@@ -255,7 +256,7 @@ const ExpiryLabel = ({ expiresAt }) => {
 };
 
 const URLRow = ({ url, onCopy, onDelete, onAnalytics, onQrCode }) => {
-  const shortUrl = `${import.meta.env.VITE_BACKEND_URL}/${url.shortCode}`;
+  const shortUrl = getShortUrl(url.shortCode);
   const expired = isExpired(url.expiresAt);
 
   return (
@@ -492,7 +493,7 @@ const AnalyticsModal = ({ url, onClose }) => {
 };
 
 const QRModal = ({ url, onClose }) => {
-  const shortUrl = `${import.meta.env.VITE_BACKEND_URL}/${url.shortCode}`;
+  const shortUrl = getShortUrl(url.shortCode);
 
   const download = () => {
     const svg = document.getElementById("qr-svg");

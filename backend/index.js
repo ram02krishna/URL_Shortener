@@ -60,6 +60,14 @@ const urlLimiter = rateLimit({
 app.use(globalLimiter);
 app.use(authenticationMiddleware);
 
+// URL normalization middleware to fix double slashes (e.g., //bJAfSN -> /bJAfSN)
+app.use((req, res, next) => {
+  if (req.url.includes('//')) {
+    req.url = req.url.replace(/\/\/+/g, '/');
+  }
+  next();
+});
+
 app.get("/", (req, res) => {
   return res.json({ status: "Server is up and running..." });
 });
@@ -78,10 +86,9 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Only listen locally, Vercel will export the app instead
-if (process.env.NODE_ENV !== "production" && process.env.VERCEL !== "1") {
+if (process.env.VERCEL !== "1") {
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server is running on http://0.0.0.0:${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
   });
 }
 

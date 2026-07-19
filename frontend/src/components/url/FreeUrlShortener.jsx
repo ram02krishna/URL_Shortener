@@ -4,6 +4,7 @@ import { Copy, ExternalLink, Loader2, ArrowRight } from "lucide-react";
 import { createShortUrlFree } from "../../services/url.service";
 import { getOrCreateDeviceId, incrementFreeUses, getRemainingFreeUses } from "../../utils/device";
 import { useNavigate } from "react-router-dom";
+import { getShortUrl } from "../../utils/urlFormat";
 
 const FreeUrlShortener = () => {
   const [originalUrl, setOriginalUrl] = useState("");
@@ -22,7 +23,7 @@ const FreeUrlShortener = () => {
       const deviceId = getOrCreateDeviceId();
       const res = await createShortUrlFree({ url: originalUrl, deviceId });
       incrementFreeUses();
-      setShortUrl(`${import.meta.env.VITE_BACKEND_URL}/${res.data.shortCode}`);
+      setShortUrl(getShortUrl(res.data.shortCode));
       toast.success("Done!");
     } catch (err) {
       toast.error(err.response?.data?.message || "Something went wrong");
