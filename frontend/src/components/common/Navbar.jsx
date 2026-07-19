@@ -39,8 +39,8 @@ const Navbar = () => {
     <header
       className={`fixed top-0 inset-x-0 z-50 border-b transition-colors duration-200 ${
         scrolled
-          ? "bg-white/95 dark:bg-[#111]/95 backdrop-blur-md border-zinc-200 dark:border-zinc-800"
-          : "bg-white dark:bg-[#111111] border-transparent"
+          ? "bg-[#f0f5ff]/95 dark:bg-[#070e2b]/95 backdrop-blur-md border-accent-200 dark:border-accent-900/60"
+          : "bg-[#f0f5ff] dark:bg-[#070e2b] border-transparent"
       }`}
     >
       <div className="max-w-5xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
@@ -68,8 +68,8 @@ const Navbar = () => {
               to={to}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 location.pathname === to
-                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
-                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100"
+                  ? "bg-accent-100 dark:bg-accent-900/40 text-accent-900 dark:text-accent-200"
+                  : "text-accent-700 dark:text-accent-300 hover:bg-accent-100 dark:hover:bg-accent-900/30 hover:text-accent-900 dark:hover:text-accent-100"
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -118,12 +118,13 @@ const Navbar = () => {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="sm:hidden border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#111111] px-4 py-3 space-y-1 animate-fade-in">
+        <div className="sm:hidden border-t border-accent-200 dark:border-accent-900/50 bg-[#f0f5ff] dark:bg-[#070e2b]">
+          <div className="px-4 py-3 space-y-1 animate-fade-in">
           {navLinks.map(({ to, icon: Icon, label }) => (
             <Link
               key={to}
               to={to}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-accent-700 dark:text-accent-300 hover:bg-accent-100 dark:hover:bg-accent-900/30"
             >
               <Icon className="w-4 h-4" />
               {label}
@@ -131,18 +132,19 @@ const Navbar = () => {
           ))}
           {!user ? (
             <>
-              <Link to="/login" className="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800">Sign in</Link>
-              <Link to="/register" className="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-accent-600 hover:bg-zinc-100 dark:hover:bg-zinc-800">Get started</Link>
+              <Link to="/login" className="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-accent-700 dark:text-accent-300 hover:bg-accent-100 dark:hover:bg-accent-900/30">Sign in</Link>
+              <Link to="/register" className="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90" style={{background:'linear-gradient(135deg,#0066bb,#00aaff)'}}>Get started</Link>
             </>
           ) : (
             <button
               onClick={() => { logout(); navigate("/login"); }}
-              className="flex w-full items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              className="flex w-full items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-accent-700 dark:text-accent-300 hover:bg-accent-100 dark:hover:bg-accent-900/30"
             >
               <LogOut className="w-4 h-4" />
               Sign out
             </button>
           )}
+          </div>
         </div>
       )}
     </header>
