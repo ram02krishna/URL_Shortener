@@ -35,7 +35,7 @@ export function getOrCreateDeviceId() {
 /**
  * Get current free uses count
  */
-export function getFreeUsesCount() {
+function getFreeUsesCount() {
   const count = localStorage.getItem(FREE_USES_KEY);
   return count ? parseInt(count) : 0;
 }
@@ -51,24 +51,9 @@ export function incrementFreeUses() {
 }
 
 /**
- * Check if user has remaining free uses
- */
-export function hasRemainingFreeUses() {
-  const count = getFreeUsesCount();
-  return count < 3;
-}
-
-/**
  * Get remaining free uses
  */
 export function getRemainingFreeUses() {
   const count = getFreeUsesCount();
   return Math.max(0, 3 - count);
-}
-
-/**
- * Reset free uses (for testing purposes - called when user logs in)
- */
-export function resetFreeUses() {
-  localStorage.removeItem(FREE_USES_KEY);
 }
