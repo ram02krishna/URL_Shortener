@@ -21,8 +21,8 @@ export const loginPostRequestBodySchema = z.object({
 export const shortenPostRequestBodySchema = z.object({
   url: z.string().url(),
   code: z.string().optional(),
-  deviceId: z.string().optional(), // For free tier tracking
-  expiresAt: z.string().datetime().optional(), // ISO 8601 string, null = never expires
+  deviceId: z.string().optional(), 
+  expiresAt: z.string().datetime().optional(), 
   password: z.string().optional(),
 });
 

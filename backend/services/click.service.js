@@ -4,7 +4,6 @@ import { clicksTable } from "../models/index.js";
 
 const LOCALHOST_IPS = new Set(["::1", "127.0.0.1", "::ffff:127.0.0.1"]);
 
-// Geo-lookup using ip-api.com
 async function geoLookup(ip) {
   if (!ip || LOCALHOST_IPS.has(ip)) {
     return { country: "Localhost", city: "Localhost", latitude: null, longitude: null };
@@ -12,7 +11,7 @@ async function geoLookup(ip) {
   try {
     const res = await fetch(
       `http://ip-api.com/json/${ip}?fields=status,country,city,lat,lon`,
-      { signal: AbortSignal.timeout(3000) }   // 3 s timeout
+      { signal: AbortSignal.timeout(3000) }   
     );
     const data = await res.json();
     if (data.status === "success") {
@@ -29,10 +28,9 @@ async function geoLookup(ip) {
   }
 }
 
-// Logs a click event
 export async function logClick({ urlId, ip, ua }) {
   try {
-    // Parse UA
+    
     const parser = new UAParser(ua);
     const result = parser.getResult();
     const browser = result.browser.name ?? "Unknown";
@@ -42,10 +40,8 @@ export async function logClick({ urlId, ip, ua }) {
       : rawType === "tablet" ? "Tablet"
         : "Desktop";
 
-    // Lookup Geo
     const { country, city, latitude, longitude } = await geoLookup(ip);
 
-    // Insert stats
     await db.insert(clicksTable).values({
       urlId,
       ipAddress: ip || "Unknown",
@@ -57,7 +53,6 @@ export async function logClick({ urlId, ip, ua }) {
       os,
       device,
     });
-  } catch (err) {
-    console.error("[logClick error]", err.message);
+  } catch (err) {
   }
 }

@@ -1,9 +1,6 @@
 const DEVICE_ID_KEY = "device_id";
 const FREE_USES_KEY = "free_uses";
 
-/**
- * Generate a unique device ID using browser fingerprinting
- */
 function generateDeviceId() {
   const navigator_info = window.navigator;
   const screen_info = window.screen;
@@ -15,12 +12,9 @@ function generateDeviceId() {
 
   let hash = uid + uid2 + uid3 + uid4_string;
 
-  return btoa(hash).substring(0, 20); // Create a base64 hash
+  return btoa(hash).substring(0, 20); 
 }
 
-/**
- * Get or create device ID
- */
 export function getOrCreateDeviceId() {
   let deviceId = localStorage.getItem(DEVICE_ID_KEY);
 
@@ -32,17 +26,11 @@ export function getOrCreateDeviceId() {
   return deviceId;
 }
 
-/**
- * Get current free uses count
- */
 function getFreeUsesCount() {
   const count = localStorage.getItem(FREE_USES_KEY);
   return count ? parseInt(count) : 0;
 }
 
-/**
- * Increment free uses count
- */
 export function incrementFreeUses() {
   const currentCount = getFreeUsesCount();
   const newCount = currentCount + 1;
@@ -50,9 +38,6 @@ export function incrementFreeUses() {
   return newCount;
 }
 
-/**
- * Get remaining free uses
- */
 export function getRemainingFreeUses() {
   const count = getFreeUsesCount();
   return Math.max(0, 3 - count);

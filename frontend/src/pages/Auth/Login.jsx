@@ -38,7 +38,7 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 pt-14">
       <div className="w-full max-w-sm animate-slide-up">
-        {/* Header */}
+
         <div className="mb-6">
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 mb-6 transition-colors">
             ← Back to home
@@ -52,7 +52,6 @@ const Login = () => {
           </p>
         </div>
 
-        {/* Form */}
         <form onSubmit={submit} className="space-y-4">
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">

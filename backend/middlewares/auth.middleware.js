@@ -1,36 +1,28 @@
 import { validateToken } from "../utils/token.js";
 import { getUserById } from "../services/user.service.js";
 
-/**
- *
- * @param {import("express").Request}req
- * @param {import("express").Response}res
- * @param {import("express").NextFunction}next
- *
- */
-
 export async function authenticationMiddleware(req, res, next) {
   try {
-    const authHeader = req.headers["authorization"];
+    let authHeader = req.headers["authorization"];
 
     if (!authHeader) return next();
 
     if (!authHeader.startsWith("Bearer"))
       return res
         .status(400)
-        .json({ error: "Authorization header must start with Bearer" });
+        .json({ error: "Auth header should start with Bearer" });
 
-    const token = authHeader.split(" ")[1];
+    let token = authHeader.split(" ")[1];
 
-    const validationResult = await validateToken(token);
+    let isValid = await validateToken(token);
 
-    if (validationResult.error) {
+    if (isValid.error) {
       return res.status(401).json({
-        error: validationResult.error,
+        error: isValid.error,
       });
     }
 
-    const user = await getUserById(validationResult.data.id);
+    let user = await getUserById(isValid.data.id);
 
     if (!user) {
       return res.status(401).json({
@@ -39,21 +31,14 @@ export async function authenticationMiddleware(req, res, next) {
     }
 
     req.user = user;
-
     return next();
-  } catch (error) {
-    console.error(error);
+  } catch (error) {
     return res.status(500).json({
       error: "Internal Server Error",
+
     });
   }
 }
-
-/**
- * @param {import("express").Request} req
- * @param {import("express").Response} res
- * @param {import("express").NextFunction} next
- */
 
 export function ensureAuthenticated(req, res, next) {
   if (!req.user || !req.user.id) {

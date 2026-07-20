@@ -9,13 +9,12 @@ import urlRouter from "./routes/url.routes.js";
 const app = express();
 const PORT = process.env.PORT ?? 8000;
 
-// Enable 'trust proxy' for Vercel/proxies to fix express-rate-limit IP identification
 app.set("trust proxy", 1);
 
-// ✅ CORS CONFIG
-const allowedOrigins = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(',').map(o => o.trim().replace(/\/$/, ""))
-  : ["http://localhost:5173"];
+let allowedOrigins = ["http://localhost:5173"];
+if (process.env.CORS_ORIGIN) {
+  allowedOrigins = process.env.CORS_ORIGIN.split(',').map(o => o.trim().replace(/\/$/, ""));
+}
 
 app.use(
   cors({
@@ -23,7 +22,7 @@ app.use(
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        callback(new Error('CORS error'));
       }
     },
     credentials: true
@@ -32,26 +31,25 @@ app.use(
 
 app.use(express.json());
 
-// Rate Limiting Middleware
 const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000, 
+  max: 100, 
   message: "Too many requests from this IP, please try again later.",
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  standardHeaders: true, 
+  legacyHeaders: false, 
 });
 
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // Stricter limit for auth endpoints (increased for testing)
+  windowMs: 15 * 60 * 1000, 
+  max: 50, 
   message: "Too many login/signup attempts, please try again later.",
   standardHeaders: true,
   legacyHeaders: false,
 });
 
 const urlLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 30, // limit short URL creation
+  windowMs: 1 * 60 * 1000, 
+  max: 30, 
   message: "Too many URL shortening requests, please try again later.",
   standardHeaders: true,
   legacyHeaders: false,
@@ -60,7 +58,6 @@ const urlLimiter = rateLimit({
 app.use(globalLimiter);
 app.use(authenticationMiddleware);
 
-// URL normalization middleware to fix double slashes (e.g., //bJAfSN -> /bJAfSN)
 app.use((req, res, next) => {
   if (req.url.includes('//')) {
     req.url = req.url.replace(/\/\/+/g, '/');
@@ -75,20 +72,16 @@ app.get("/", (req, res) => {
 app.use("/user", authLimiter, userRouter);
 app.use(urlLimiter, urlRouter);
 
-// ✅ GLOBAL ERROR HANDLER — catches any error thrown/forwarded via next(err) in any route or middleware
-// eslint-disable-next-line no-unused-vars
-app.use((err, req, res, next) => {
-  console.error("[Global Error Handler]", err);
-  const statusCode = err.status ?? err.statusCode ?? 500;
-  return res.status(statusCode).json({
-    error: err.message || "Internal Server Error",
+app.use((err, req, res, next) => {
+  let status = err.status || err.statusCode || 500;
+  return res.status(status).json({
+    error: err.message || "Something went wrong",
     ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
   });
 });
 
 if (process.env.VERCEL !== "1") {
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server is running on port ${PORT}`);
+  app.listen(PORT, "0.0.0.0", () => {
   });
 }
 

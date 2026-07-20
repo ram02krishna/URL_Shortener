@@ -19,7 +19,7 @@ const features = [
 const Home = () => {
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Hero */}
+
       <section className="flex-1 flex items-center justify-center px-4 py-20 sm:py-28">
         <div className="max-w-2xl mx-auto w-full text-center space-y-8 animate-slide-up">
           <div className="space-y-4">
@@ -32,12 +32,10 @@ const Home = () => {
             </p>
           </div>
 
-          {/* Free shortener inline */}
           <div className="card p-5 text-left">
             <FreeUrlShortener />
           </div>
 
-          {/* Auth links */}
           <p className="text-sm text-zinc-400 dark:text-zinc-500">
             Want unlimited links and analytics?{" "}
             <Link to="/register" className="text-accent-600 hover:underline font-medium">
@@ -51,7 +49,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Features */}
       <section className="border-t border-zinc-200 dark:border-zinc-800 px-4 py-16">
         <div className="max-w-3xl mx-auto">
           <div className="grid sm:grid-cols-3 gap-8">

@@ -4,27 +4,27 @@ nanoURL is a sleek, full-stack URL shortening platform built for speed, security
 
 ## Key Features
 
-- ** Instant Shortening**: Transform long URLs into concise, manageable links in seconds.
-- ** Advanced Analytics**: Gain deep insights with detailed click tracking, including IP addresses, browser info, OS, and device types.
-- ** Password-Protected Links**: Add an extra layer of security by requiring a password for specific shortened URLs.
-- ** Link Expiration**: Set custom expiration dates for your links to ensure they are only accessible when needed.
-- ** QR Code Generation**: Instantly generate and download QR codes for every shortened URL.
-- ** OTP Verification**: Secure user onboarding and password recovery via Email OTP (One-Time Password) verification.
-- ** Free-to-Try Tier**: Shorten up to 3 URLs instantly without an account—perfect for quick, anonymous shares.
-- ** Robust Security**: JWT-based authentication, salted password hashing, and centralized Zod-powered validation.
-- ** Responsive Dashboard**: A unified interface to monitor, copy, delete, and view analytics for your entire URL portfolio.
-- ** Adaptive Theming**: Seamlessly switch between Light, Dark, and System modes for optimal readability.
-- ** High Performance**: Powered by a PostgreSQL backend and Drizzle ORM for lightning-fast redirection and data retrieval.
+- Instant Shortening: Transform long URLs into concise, manageable links in seconds.
+- Advanced Analytics: Gain deep insights with detailed click tracking, including IP addresses, browser info, OS, and device types.
+- Password-Protected Links: Add an extra layer of security by requiring a password for specific shortened URLs.
+- Link Expiration: Set custom expiration dates for your links to ensure they are only accessible when needed.
+- QR Code Generation: Instantly generate and download QR codes for every shortened URL.
+- OTP Verification: Secure user onboarding and password recovery via Email OTP (One-Time Password) verification.
+- Free-to-Use: Shorten up to 3 URLs instantly without an account—perfect for quick, anonymous shares.
+- Robust Security: JWT-based authentication, salted password hashing, and centralized Zod-powered validation.
+- Responsive Dashboard: A unified interface to monitor, copy, delete, and view analytics for your entire URL portfolio.
+- Adaptive Theming: Seamlessly switch between Light, Dark, and System modes for optimal readability.
+- High Performance: Powered by a PostgreSQL backend and Drizzle ORM for lightning-fast redirection and data retrieval.
 
 ## Tech Stack
 
 | Category           | Technology                                     |
 | ------------------ | ---------------------------------------------- |
-| **Frontend**       | React, Vite, Tailwind CSS, React Router, Axios, React QR Code |
-| **Backend**        | Node.js, Express.js, PostgreSQL, Drizzle ORM   |
-| **Authentication** | JSON Web Tokens (JWT) + Email OTP              |
-| **Validation**     | Zod (Centralized Middleware)                   |
-| **Deployment**     | Docker, Docker Compose, Vercel (Serverless)    |
+| Frontend           | React, Vite, Tailwind CSS, React Router, Axios, React QR Code |
+| Backend            | Node.js, Express.js, PostgreSQL, Drizzle ORM   |
+| Authentication     | JSON Web Tokens (JWT) + Email OTP              |
+| Validation         | Zod (Centralized Middleware)                   |
+| Deployment         | Docker, Docker Compose, Vercel (Serverless)    |
 
 ## Project Structure
 
@@ -118,10 +118,6 @@ cd <repository-folder>
 
 ---
 
-## API Documentation
-
-### Quick API Examples
-
 **Authenticated URL Shortening with Expiration & Password**:
 
 ```bash
@@ -165,11 +161,3 @@ nanoURL uses a relational schema managed by Drizzle ORM:
 - **`url_clicks`**: Stores detailed analytics for every click (IP, Browser, OS, Device, Timestamp).
 
 ---
-
-## Deployment
-
-nanoURL is optimized for **Vercel**.
-
-- Backend runs as serverless functions.
-- Frontend is a static SPA with client-side routing.
-- Database can be hosted on any PostgreSQL provider (Neon, Supabase, etc.).

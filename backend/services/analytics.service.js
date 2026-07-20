@@ -2,11 +2,9 @@ import { db } from "../db/index.js";
 import { clicksTable } from "../models/index.js";
 import { eq, sql, count, countDistinct, desc } from "drizzle-orm";
 
-// Returns aggregated analytics for a given URL
 export async function getUrlAnalytics(urlId) {
   const where = eq(clicksTable.urlId, urlId);
 
-  // Helper: top-N breakdown for a column
   function topN(col) {
     return db
       .select({ label: col, count: count().as("count") })
@@ -17,7 +15,6 @@ export async function getUrlAnalytics(urlId) {
       .limit(10);
   }
 
-  // Run all queries in parallel
   const [
     [totals],
     clicksOverTime,
@@ -28,13 +25,12 @@ export async function getUrlAnalytics(urlId) {
     devices,
     visitorIps,
   ] = await Promise.all([
-    // Total & unique clicks
+    
     db.select({
       totalClicks: count().as("total_clicks"),
       uniqueClicks: countDistinct(clicksTable.ipAddress).as("unique_clicks"),
     }).from(clicksTable).where(where),
 
-    // Clicks by day — last 30 days
     db.select({
       date: sql`DATE(${clicksTable.clickedAt})`.as("date"),
       count: count().as("count"),
@@ -45,14 +41,12 @@ export async function getUrlAnalytics(urlId) {
       .groupBy(sql`DATE(${clicksTable.clickedAt})`)
       .orderBy(sql`DATE(${clicksTable.clickedAt}) asc`),
 
-    // Breakdowns
     topN(clicksTable.country),
     topN(clicksTable.city),
     topN(clicksTable.browser),
     topN(clicksTable.os),
     topN(clicksTable.device),
 
-    // Visitor IPs — most recently seen first
     db.select({
       ip: clicksTable.ipAddress,
       country: clicksTable.country,

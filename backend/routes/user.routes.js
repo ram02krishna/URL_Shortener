@@ -26,37 +26,29 @@ router.post(
   asyncHandler(async (req, res) => {
     const { firstname, lastname, email, password } = req.body;
 
-    const existingUser = await getUserByEmail(email);
+    let oldUser = await getUserByEmail(email);
 
-    if (existingUser) {
+    if (oldUser) {
       return res.status(400).json({
         error: `User with email ${email} already exists!`,
       });
     }
 
-    // const salt = randomBytes(256).toString("hex");
-    // const hashedPassword = createHmac("sha256", salt)
-    //   .update(password)
-    //   .digest("hex");
+    let { salt, password: hash } = hashPasswordWithSalt(password);
 
-    const { salt, password: hashedPassword } = hashPasswordWithSalt(password);
-
-    // Generate 6 digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 mins
+    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); 
 
     const user = await createNewUser({
       firstname,
       lastname,
       email,
       salt,
-      hashedPassword,
+      hashedPassword: hash,
       otp,
       otpExpiry,
     });
 
-    // Await the email sending on serverless environments like Vercel
-    // otherwise the function might terminate before the email is actually sent.
     await sendOTPEmail(email, otp);
 
     return res.status(201).json({
@@ -74,9 +66,10 @@ router.post(
   asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
-    const user = await getUserByEmail(email);
+    let user = await getUserByEmail(email);
 
     if (!user) {
+      
       return res.status(400).json({
         error: `User with email ${email} does not exist`,
       });
@@ -88,19 +81,18 @@ router.post(
       });
     }
 
-    const { password: hashedPassword } = hashPasswordWithSalt(
+    let { password: hash } = hashPasswordWithSalt(
       password,
       user.salt
     );
 
-    if (user.password !== hashedPassword) {
+    if (user.password !== hash) {
       return res.status(400).json({
         error: "Invalid Password",
       });
     }
 
-    // const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
-    const token = await createUserToken({ id: user.id });
+    let token = await createUserToken({ id: user.id });
 
     return res.json({ token });
   })
@@ -133,7 +125,6 @@ router.post(
       return res.status(400).json({ error: "OTP expired. Please register again or request new OTP." });
     }
 
-    // Update user to verified
     await db
       .update(usersTable)
       .set({
@@ -143,8 +134,7 @@ router.post(
       })
       .where(eq(usersTable.id, user.id));
 
-    // Login user automatically after verification
-    const token = await createUserToken({ id: user.id });
+    let token = await createUserToken({ id: user.id });
 
     return res.json({
       message: "Email verified successfully",
@@ -158,15 +148,15 @@ router.post(
   validate(forgotPasswordSchema),
   asyncHandler(async (req, res) => {
     const { email } = req.body;
-    const user = await getUserByEmail(email);
+    let user = await getUserByEmail(email);
 
     if (!user) {
-      // Don't leak whether user exists or not
+      
       return res.status(200).json({ message: "If that email is registered, you will receive a reset OTP shortly." });
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 mins
+    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); 
 
     await db
       .update(usersTable)
@@ -201,13 +191,13 @@ router.post(
        return res.status(400).json({ error: "OTP has expired." });
     }
 
-    const { salt, password: hashedPassword } = hashPasswordWithSalt(newPassword);
+    let { salt, password: hash } = hashPasswordWithSalt(newPassword);
 
     await db
       .update(usersTable)
       .set({
         salt,
-        password: hashedPassword,
+        password: hash,
         otp: null,
         otpExpiry: null,
       })
@@ -229,19 +219,19 @@ router.post(
       return res.status(400).json({ error: "User not found." });
     }
 
-    const { password: oldHashedPassword } = hashPasswordWithSalt(oldPassword, user.salt);
+    let { password: oldHash } = hashPasswordWithSalt(oldPassword, user.salt);
 
-    if (user.password !== oldHashedPassword) {
+    if (user.password !== oldHash) {
       return res.status(400).json({ error: "Incorrect old password." });
     }
 
-    const { salt: newSalt, password: newHashedPassword } = hashPasswordWithSalt(newPassword);
+    let { salt: newSalt, password: newHash } = hashPasswordWithSalt(newPassword);
 
     await db
       .update(usersTable)
       .set({
         salt: newSalt,
-        password: newHashedPassword,
+        password: newHash,
       })
       .where(eq(usersTable.id, user.id));
 

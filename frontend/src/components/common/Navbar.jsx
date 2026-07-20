@@ -7,7 +7,7 @@ import { useTheme } from "../../context/ThemeContext";
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout } = useAuth(); 
   const { theme, setTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -44,9 +44,9 @@ const Navbar = () => {
       }`}
     >
       <div className="max-w-5xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
-        {/* Logo */}
+
         <Link to="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
-          {/* Show only the top icon portion of the logo PNG */}
+
           <div className="h-9 w-9 overflow-hidden flex-shrink-0">
             <img
               src="/nanoURL_logo.png"
@@ -60,7 +60,6 @@ const Navbar = () => {
           </div>
         </Link>
 
-        {/* Desktop nav */}
         <nav className="hidden sm:flex items-center gap-1">
           {navLinks.map(({ to, icon: Icon, label }) => (
             <Link
@@ -78,7 +77,6 @@ const Navbar = () => {
           ))}
         </nav>
 
-        {/* Right side */}
         <div className="flex items-center gap-2">
           <button
             onClick={cycleTheme}
@@ -105,7 +103,6 @@ const Navbar = () => {
             </button>
           )}
 
-          {/* Mobile menu toggle */}
           <button
             className="sm:hidden btn-icon btn-ghost"
             onClick={() => setMobileOpen(v => !v)}
@@ -116,7 +113,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile menu */}
       {mobileOpen && (
         <div className="sm:hidden border-t border-accent-200 dark:border-accent-900/50 bg-[#f0f5ff] dark:bg-[#070e2b]">
           <div className="px-4 py-3 space-y-1 animate-fade-in">

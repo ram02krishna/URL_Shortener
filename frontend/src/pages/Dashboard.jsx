@@ -96,7 +96,6 @@ const Dashboard = () => {
     >
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
 
-        {/* Page header */}
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">Links</h1>
@@ -106,9 +105,8 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Create form */}
         <form onSubmit={submit} onClick={e => e.stopPropagation()} className="card p-4 mb-6">
-          {/* URL input row */}
+
           <div className="flex gap-2">
             <input
               type="url"
@@ -128,9 +126,8 @@ const Dashboard = () => {
             </button>
           </div>
 
-          {/* Advanced options row */}
           <div className="mt-2 flex flex-col sm:flex-row gap-2">
-            {/* Expiry picker */}
+
             <div className="relative shrink-0" onClick={e => e.stopPropagation()}>
               <button
                 type="button"
@@ -185,7 +182,6 @@ const Dashboard = () => {
           </div>
         </form>
 
-        {/* Links list */}
         {urls.length === 0 ? (
           <div className="card p-12 text-center">
             <LinkIcon className="w-8 h-8 text-zinc-300 dark:text-zinc-600 mx-auto mb-3" />
@@ -208,7 +204,6 @@ const Dashboard = () => {
         )}
       </div>
 
-      {/* Modals */}
       {deleteConfirm && (
         <DeleteModal
           onConfirm={() => handleDelete(deleteConfirm)}
@@ -224,8 +219,6 @@ const Dashboard = () => {
     </div>
   );
 };
-
-// ── Sub-components ──────────────────────────────────────────
 
 const ExpiryLabel = ({ expiresAt }) => {
   const [, setTick] = useState(0);
@@ -262,11 +255,11 @@ const URLRow = ({ url, onCopy, onDelete, onAnalytics, onQrCode }) => {
   return (
     <div className={`card p-3 sm:p-4 transition-opacity ${expired ? "opacity-50" : ""}`}>
       <div className="flex items-start gap-3">
-        {/* Link info */}
+
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-sm font-mono font-medium text-accent-600 dark:text-accent-400 truncate max-w-[200px] sm:max-w-none">
-              {shortUrl.replace(/^https?:\/\//, "")}
+              {shortUrl.replace(/^https?:\/\//, '')}
             </span>
             {url.hasPassword && (
               <span className="badge-zinc"><Lock className="w-3 h-3" />Protected</span>
@@ -278,7 +271,6 @@ const URLRow = ({ url, onCopy, onDelete, onAnalytics, onQrCode }) => {
           </p>
         </div>
 
-        {/* Action buttons — always visible, larger tap targets on mobile */}
         <div className="flex items-center gap-0.5 shrink-0 -mr-1">
           {!expired && (
             <a
@@ -319,13 +311,11 @@ const URLRow = ({ url, onCopy, onDelete, onAnalytics, onQrCode }) => {
   );
 };
 
-// ── Modals ──────────────────────────────────────────────────
-
 const Modal = ({ onClose, children, width = "max-w-md" }) => {
   useEffect(() => {
     const handler = e => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", handler);
-    // Prevent body scroll when modal is open
+    
     document.body.style.overflow = "hidden";
     return () => {
       window.removeEventListener("keydown", handler);
@@ -342,7 +332,7 @@ const Modal = ({ onClose, children, width = "max-w-md" }) => {
         className={`card shadow-xl w-full ${width} animate-slide-up-sheet sm:animate-slide-up max-h-[92dvh] sm:max-h-[90vh] overflow-hidden flex flex-col rounded-t-2xl rounded-b-none sm:rounded-xl`}
         onClick={e => e.stopPropagation()}
       >
-        {/* Drag handle — only shown on mobile */}
+
         <div className="flex justify-center pt-2.5 pb-0 sm:hidden">
           <div className="w-9 h-1 rounded-full bg-zinc-300 dark:bg-zinc-600" />
         </div>
@@ -427,7 +417,7 @@ const AnalyticsModal = ({ url, onClose }) => {
         )}
         {data && !loading && (
           <div className="space-y-6">
-            {/* Stats */}
+
             <div className="grid grid-cols-2 gap-3">
               {[
                 { label: "Total clicks", value: data.totalClicks, icon: MousePointerClick },
@@ -443,7 +433,6 @@ const AnalyticsModal = ({ url, onClose }) => {
               ))}
             </div>
 
-            {/* Visitor table */}
             {data.visitorIps?.length > 0 && (
               <div>
                 <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">

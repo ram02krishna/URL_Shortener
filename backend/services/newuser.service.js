@@ -26,5 +26,5 @@ export async function createNewUser({
       id: usersTable.id,
     });
 
-  return user; // { id }
+  return user; 
 }

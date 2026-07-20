@@ -42,7 +42,7 @@ const FreeUrlShortener = () => {
   return (
     <div className="w-full">
       {shortUrl ? (
-        /* Result state */
+        
         <div className="animate-slide-up space-y-3">
           <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Your shortened link</p>
           <div className="flex items-center gap-2 p-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl">
@@ -73,7 +73,7 @@ const FreeUrlShortener = () => {
           </button>
         </div>
       ) : remainingUses <= 0 ? (
-        /* Out of uses */
+        
         <div className="animate-slide-up text-center py-4 space-y-3">
           <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
             You've used all 3 free shortens.
@@ -85,7 +85,7 @@ const FreeUrlShortener = () => {
           <p className="text-xs text-zinc-400">Unlimited links, analytics, and more.</p>
         </div>
       ) : (
-        /* Form state */
+        
         <form onSubmit={submit} className="animate-fade-in space-y-3">
           <div className="flex flex-col sm:flex-row gap-2">
             <input

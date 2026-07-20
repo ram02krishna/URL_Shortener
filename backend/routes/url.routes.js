@@ -13,7 +13,6 @@ import { validate } from "../middlewares/validate.middleware.js";
 
 const router = express.Router();
 
-// Shorten URL without authentication (free tier)
 router.post(
   "/shorten-free",
   validate(shortenPostRequestBodySchema),
@@ -23,25 +22,24 @@ router.post(
       return res.status(400).json({ error: "Device ID is required for free tier" });
     }
 
-    const result = await createShortUrl({ url, code, deviceId, expiresAt, password });
+    let resData = await createShortUrl({ url, code, deviceId, expiresAt, password });
 
     return res.status(201).json({
-      id: result.id,
-      shortCode: result.shortCode,
-      targetURL: result.targetURL,
-      hasPassword: result.hasPassword,
+      id: resData.id,
+      shortCode: resData.shortCode,
+      targetURL: resData.targetURL,
+      hasPassword: resData.hasPassword,
     });
   })
 );
 
-// Shorten URL with authentication
 router.post(
   "/shorten",
   ensureAuthenticated,
   validate(shortenPostRequestBodySchema),
   asyncHandler(async function (req, res) {
     const { url, code, expiresAt, password } = req.body;
-    const result = await createShortUrl({ url, code, userId: req.user.id, expiresAt, password });
+    let result = await createShortUrl({ url, code, userId: req.user.id, expiresAt, password });
 
     return res.status(201).json({
       id: result.id,
@@ -74,15 +72,13 @@ router.get(
   })
 );
 
-// Get analytics for a URL the user owns
 router.get(
   "/:id/analytics",
   ensureAuthenticated,
   asyncHandler(async function (req, res) {
     const { id } = req.params;
 
-    // Verify the URL belongs to this user
-    const [url] = await db
+    let [url] = await db
       .select({ id: urlsTable.id })
       .from(urlsTable)
       .where(and(eq(urlsTable.id, id), eq(urlsTable.userId, req.user.id)));
@@ -110,7 +106,6 @@ router.delete(
   })
 );
 
-// Resolve short code and redirect
 router.get(
   "/:shortCode",
   asyncHandler(async function (req, res) {
@@ -129,24 +124,21 @@ router.get(
       return res.status(404).json({ error: "Short URL not found" });
     }
 
-    // Check if the link has expired
     if (result.expiresAt && new Date() > new Date(result.expiresAt)) {
       return res.status(410).json({
         error: "This link has expired and is no longer available.",
       });
     }
 
-    // Check if the link is password protected
     if (result.password) {
-      // Redirect to frontend password prompt page
+      
       const frontendUrl = process.env.CORS_ORIGIN
         ? process.env.CORS_ORIGIN.split(',')[0].trim()
         : "http://localhost:5173";
       return res.redirect(`${frontendUrl}/p/${code}`);
     }
 
-    // Log click and await it to ensure it finishes on serverless environments
-    const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim()
+    let ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim()
       ?? req.socket.remoteAddress
       ?? "Unknown";
     const ua = req.headers["user-agent"] ?? "";
@@ -156,7 +148,6 @@ router.get(
   })
 );
 
-// Verify password for protected link
 router.post(
   "/verify-password/:shortCode",
   asyncHandler(async function (req, res) {
@@ -191,7 +182,6 @@ router.post(
       return res.status(401).json({ error: "Incorrect password" });
     }
 
-    // Password matches, log click and await it
     const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim()
       ?? req.socket.remoteAddress
       ?? "Unknown";

@@ -51,7 +51,6 @@ const ForgotPassword = () => {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 pt-14">
       <div className="w-full max-w-sm animate-slide-up">
-        {/* Header */}
         <div className="mb-6">
           <Link to="/login" className="inline-flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 mb-6 transition-colors">
             ← Back to login
@@ -63,8 +62,6 @@ const ForgotPassword = () => {
             {step === 1 ? "Enter your email to receive a reset code" : "Enter the code and your new password"}
           </p>
         </div>
-
-        {/* Form Step 1: Request OTP */}
         {step === 1 && (
           <form onSubmit={handleRequestOtp} className="space-y-4">
             <div className="space-y-1.5">
@@ -91,8 +88,6 @@ const ForgotPassword = () => {
             </button>
           </form>
         )}
-
-        {/* Form Step 2: Verify OTP and Reset */}
         {step === 2 && (
           <form onSubmit={handleResetPassword} className="space-y-4">
             <div className="space-y-1.5">

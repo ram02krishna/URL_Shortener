@@ -8,7 +8,7 @@ export const clicksTable = pgTable("url_clicks", {
     .notNull()
     .references(() => urlsTable.id, { onDelete: "cascade" }),
 
-  ipAddress: varchar("ip_address", { length: 45 }),  // supports IPv6
+  ipAddress: varchar("ip_address", { length: 45 }),  
   country: varchar("country", { length: 100 }),
   city: varchar("city", { length: 100 }),
   latitude: varchar("latitude", { length: 50 }),
@@ -16,7 +16,7 @@ export const clicksTable = pgTable("url_clicks", {
 
   browser: varchar("browser", { length: 100 }),
   os: varchar("os", { length: 100 }),
-  device: varchar("device", { length: 50 }),  // "mobile" | "tablet" | "desktop"
+  device: varchar("device", { length: 50 }),  
 
   clickedAt: timestamp("clicked_at").defaultNow().notNull(),
 }, (table) => ({

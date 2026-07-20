@@ -4,20 +4,17 @@ export async function sendOTPEmail(toEmail, otpCode) {
     try {
         let transporter;
 
-        // Use actual SMTP in production or if SMTP_HOST is explicitly provided
         if (process.env.SMTP_HOST) {
             transporter = nodemailer.createTransport({
                 host: process.env.SMTP_HOST,
                 port: process.env.SMTP_PORT || 587,
-                secure: process.env.SMTP_PORT == 465, // true for 465, false for other ports
+                secure: process.env.SMTP_PORT == 465, 
                 auth: {
                     user: process.env.SMTP_USER,
                     pass: process.env.SMTP_PASS,
                 },
             });
-        } else {
-            // Fallback for local development WITHOUT SMTP configured
-            console.log("No SMTP Config found in .env, falling back to Ethereal Email for testing.");
+        } else {
             let testAccount = await nodemailer.createTestAccount();
             transporter = nodemailer.createTransport({
                 host: "smtp.ethereal.email",
@@ -45,18 +42,13 @@ export async function sendOTPEmail(toEmail, otpCode) {
           <p>This code will expire in <strong>5 minutes</strong>.</p>
         </div>
       `,
-        });
+        });
 
-        console.log("Message sent: %s", info.messageId);
-
-        // Only print preview URL if using Ethereal
-        if (!process.env.SMTP_HOST) {
-            console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+        if (!process.env.SMTP_HOST) {
         }
 
         return true;
-    } catch (error) {
-        console.error("Error sending OTP email:", error);
+    } catch (error) {
         return false;
     }
 }
