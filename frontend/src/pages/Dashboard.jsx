@@ -23,6 +23,11 @@ const isExpired = (expiresAt) => expiresAt && new Date() > new Date(expiresAt);
 
 const Dashboard = () => {
   const [urls, setUrls] = useState([]);
+  const minDateTime = (() => {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 1);
+    return now.toISOString().slice(0, 16);
+  })();
   const [originalUrl, setOriginalUrl] = useState("");
   const [expiryOption, setExpiryOption] = useState(null);
   const [customDate, setCustomDate] = useState("");
@@ -174,7 +179,7 @@ const Dashboard = () => {
               <input
                 type="datetime-local"
                 value={customDate}
-                min={new Date(Date.now() + 60000).toISOString().slice(0, 16)}
+                min={minDateTime}
                 onChange={e => setCustomDate(e.target.value)}
                 className="input text-sm flex-1"
               />
@@ -221,15 +226,15 @@ const Dashboard = () => {
 };
 
 const ExpiryLabel = ({ expiresAt }) => {
-  const [, setTick] = useState(0);
+  const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     if (!expiresAt) return;
-    const id = setInterval(() => setTick(t => t + 1), 1000);
+    const id = window.setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, [expiresAt]);
 
   if (!expiresAt) return null;
-  const diffMs = new Date(expiresAt) - Date.now();
+  const diffMs = new Date(expiresAt) - now;
   if (diffMs <= 0) return <span className="badge-red">Expired</span>;
 
   const d = Math.floor(diffMs / 86400000);
@@ -381,7 +386,12 @@ const AnalyticsModal = ({ url, onClose }) => {
     }
   }, [url.id]);
 
-  useEffect(() => { fetch(); }, [fetch]);
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void fetch();
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [fetch]);
 
   return (
     <Modal onClose={onClose} width="max-w-2xl">
@@ -422,15 +432,18 @@ const AnalyticsModal = ({ url, onClose }) => {
               {[
                 { label: "Total clicks", value: data.totalClicks, icon: MousePointerClick },
                 { label: "Unique visitors", value: data.uniqueClicks, icon: Users },
-              ].map(({ label, value, icon: Icon }) => (
-                <div key={label} className="bg-zinc-50 dark:bg-zinc-800 rounded-xl p-4">
-                  <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 mb-1.5">
-                    <Icon className="w-4 h-4" />
-                    <span className="text-xs font-medium">{label}</span>
+              ].map((item) => {
+                const { label, value, icon: Icon } = item;
+                return (
+                  <div key={label} className="bg-zinc-50 dark:bg-zinc-800 rounded-xl p-4">
+                    <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 mb-1.5">
+                      <Icon className="w-4 h-4" />
+                      <span className="text-xs font-medium">{label}</span>
+                    </div>
+                    <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">{value?.toLocaleString() ?? 0}</p>
                   </div>
-                  <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">{value?.toLocaleString() ?? 0}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {data.visitorIps?.length > 0 && (

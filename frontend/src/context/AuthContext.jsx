@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import { getToken, removeToken } from "../utils/token";
 
 const AuthContext = createContext(null);
@@ -6,25 +6,16 @@ const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(() => {
+    const token = getToken();
+    return token ? { loggedIn: true } : null;
+  });
+  const [loading] = useState(false);
 
   const logout = () => {
     removeToken();
     setUser(null);
   };
-
-  useEffect(() => {
-    const token = getToken();
-    if (!token) {
-      
-      setLoading(false);
-      return;
-    }
-
-    setUser({ loggedIn: true });
-    setLoading(false);
-  }, []);
 
   return (
     <AuthContext.Provider value={{ user, setUser, loading, logout }}>

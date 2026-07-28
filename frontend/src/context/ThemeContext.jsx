@@ -3,9 +3,10 @@ import { createContext, useContext, useEffect, useState } from "react";
 const ThemeContext = createContext(null);
 
 export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState(
-    localStorage.getItem("theme") || "system"
-  );
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === "undefined") return "system";
+    return window.localStorage.getItem("theme") || "system";
+  });
 
   useEffect(() => {
     const applyTheme = () => {
@@ -16,7 +17,7 @@ export const ThemeProvider = ({ children }) => {
       document.documentElement.classList.toggle("dark", isDark);
     };
 
-    localStorage.setItem("theme", theme);
+    window.localStorage.setItem("theme", theme);
     applyTheme();
 
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");

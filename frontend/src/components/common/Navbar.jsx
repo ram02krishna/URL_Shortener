@@ -26,8 +26,6 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => setMobileOpen(false), [location.pathname]);
-
   const navLinks = user
     ? [
         { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -61,20 +59,24 @@ const Navbar = () => {
         </Link>
 
         <nav className="hidden sm:flex items-center gap-1">
-          {navLinks.map(({ to, icon: Icon, label }) => (
-            <Link
-              key={to}
-              to={to}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                location.pathname === to
-                  ? "bg-accent-100 dark:bg-accent-900/40 text-accent-900 dark:text-accent-200"
-                  : "text-accent-700 dark:text-accent-300 hover:bg-accent-100 dark:hover:bg-accent-900/30 hover:text-accent-900 dark:hover:text-accent-100"
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-              {label}
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const { to, icon: Icon, label } = link;
+            return (
+              <Link
+                key={to}
+                to={to}
+                onClick={() => setMobileOpen(false)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  location.pathname === to
+                    ? "bg-accent-100 dark:bg-accent-900/40 text-accent-900 dark:text-accent-200"
+                    : "text-accent-700 dark:text-accent-300 hover:bg-accent-100 dark:hover:bg-accent-900/30 hover:text-accent-900 dark:hover:text-accent-100"
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {label}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="flex items-center gap-2">
@@ -89,8 +91,8 @@ const Navbar = () => {
 
           {!user ? (
             <div className="hidden sm:flex items-center gap-2">
-              <Link to="/login" className="btn-ghost btn text-sm">Sign in</Link>
-              <Link to="/register" className="btn-primary btn text-sm">Get started</Link>
+              <Link to="/login" onClick={() => setMobileOpen(false)} className="btn-ghost btn text-sm">Sign in</Link>
+              <Link to="/register" onClick={() => setMobileOpen(false)} className="btn-primary btn text-sm">Get started</Link>
             </div>
           ) : (
             <button
@@ -116,24 +118,27 @@ const Navbar = () => {
       {mobileOpen && (
         <div className="sm:hidden border-t border-accent-200 dark:border-accent-900/50 bg-[#f0f5ff] dark:bg-[#070e2b]">
           <div className="px-4 py-3 space-y-1 animate-fade-in">
-          {navLinks.map(({ to, icon: Icon, label }) => (
-            <Link
-              key={to}
-              to={to}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-accent-700 dark:text-accent-300 hover:bg-accent-100 dark:hover:bg-accent-900/30"
-            >
-              <Icon className="w-4 h-4" />
-              {label}
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const { to, icon: Icon, label } = link;
+            return (
+              <Link
+                key={to}
+                to={to}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-accent-700 dark:text-accent-300 hover:bg-accent-100 dark:hover:bg-accent-900/30"
+              >
+                <Icon className="w-4 h-4" />
+                {label}
+              </Link>
+            );
+          })}
           {!user ? (
             <>
-              <Link to="/login" className="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-accent-700 dark:text-accent-300 hover:bg-accent-100 dark:hover:bg-accent-900/30">Sign in</Link>
-              <Link to="/register" className="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90" style={{background:'linear-gradient(135deg,#0066bb,#00aaff)'}}>Get started</Link>
+              <Link to="/login" onClick={() => setMobileOpen(false)} className="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-accent-700 dark:text-accent-300 hover:bg-accent-100 dark:hover:bg-accent-900/30">Sign in</Link>
+              <Link to="/register" onClick={() => setMobileOpen(false)} className="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90" style={{background:'linear-gradient(135deg,#0066bb,#00aaff)'}}>Get started</Link>
             </>
           ) : (
             <button
-              onClick={() => { logout(); navigate("/login"); }}
+              onClick={() => { logout(); setMobileOpen(false); navigate("/login"); }}
               className="flex w-full items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-accent-700 dark:text-accent-300 hover:bg-accent-100 dark:hover:bg-accent-900/30"
             >
               <LogOut className="w-4 h-4" />

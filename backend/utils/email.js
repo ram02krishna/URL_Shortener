@@ -1,14 +1,20 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resendApiKey = process.env.RESEND_API_KEY?.trim();
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 export async function sendOTPEmail(toEmail, otpCode) {
     try {
-        const fromEmail = process.env.RESEND_FROM_EMAIL || "nanoURL <nanoURL@resend.dev>";
+        if (!resend) {
+            console.error("RESEND_API_KEY is missing. OTP email was not sent.");
+            return false;
+        }
+
+        const fromEmail = process.env.RESEND_FROM_EMAIL?.trim() || "nanoURL <noreply@ram02krishna.me>";
 
         const data = await resend.emails.send({
             from: fromEmail,
-            to: toEmail,
+            to: [toEmail],
             subject: "Your nanoURL Verification Code",
             text: `Your nanoURL verification code is: ${otpCode}. It expires in 5 minutes.`,
             html: `
@@ -21,7 +27,7 @@ export async function sendOTPEmail(toEmail, otpCode) {
       `,
         });
 
-        if (data.error) {
+        if (data?.error) {
             console.error("Resend error:", data.error);
             return false;
         }

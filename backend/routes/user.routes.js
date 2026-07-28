@@ -49,7 +49,13 @@ router.post(
       otpExpiry,
     });
 
-    await sendOTPEmail(email, otp);
+    const emailSent = await sendOTPEmail(email, otp);
+
+    if (!emailSent) {
+      return res.status(500).json({
+        error: "User created, but the verification email could not be sent. Please try again later or contact support.",
+      });
+    }
 
     return res.status(201).json({
       message: "User created, OTP sent to email",
@@ -166,7 +172,13 @@ router.post(
       })
       .where(eq(usersTable.id, user.id));
 
-    await sendOTPEmail(email, otp);
+    const emailSent = await sendOTPEmail(email, otp);
+
+    if (!emailSent) {
+      return res.status(500).json({
+        error: "The reset OTP could not be sent right now. Please try again later.",
+      });
+    }
 
     return res.status(200).json({ message: "If that email is registered, you will receive a reset OTP shortly." });
   })
