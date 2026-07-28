@@ -71,14 +71,9 @@ cd <repository-folder>
     DATABASE_URL="postgresql://postgres:admin@localhost:5432/postgres"
     JWT_SECRET=your-super-secret-key
     CORS_ORIGIN=http://localhost:5173
-    # SMTP Configuration (Required for Production Emails)
-    SMTP_HOST=smtp.gmail.com
-    SMTP_PORT=587
-    # Replace this with your Gmail address
-    SMTP_USER=abc@gmail.com
-    # Paste your 16-character Google App Password here (NO spaces)
-    SMTP_PASS=Enter SMTP Password
-    SMTP_FROM="nanoURL Security"
+    # Email Configuration (Resend)
+    RESEND_API_KEY=your_resend_api_key_here
+    RESEND_FROM_EMAIL="nanoURL Security <onboarding@resend.dev>"
     ```
 
 3.  **Start the Database**:

@@ -1,35 +1,12 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendOTPEmail(toEmail, otpCode) {
     try {
-        let transporter;
+        const fromEmail = process.env.RESEND_FROM_EMAIL || "nanoURL <nanoURL@resend.dev>";
 
-        if (process.env.SMTP_HOST) {
-            transporter = nodemailer.createTransport({
-                host: process.env.SMTP_HOST,
-                port: process.env.SMTP_PORT || 587,
-                secure: process.env.SMTP_PORT == 465, 
-                auth: {
-                    user: process.env.SMTP_USER,
-                    pass: process.env.SMTP_PASS,
-                },
-            });
-        } else {
-            let testAccount = await nodemailer.createTestAccount();
-            transporter = nodemailer.createTransport({
-                host: "smtp.ethereal.email",
-                port: 587,
-                secure: false,
-                auth: {
-                    user: testAccount.user,
-                    pass: testAccount.pass,
-                },
-            });
-        }
-
-        const fromEmail = process.env.SMTP_FROM || '"nanoURL Security" <no-reply@nanourl.com>';
-
-        const info = await transporter.sendMail({
+        const data = await resend.emails.send({
             from: fromEmail,
             to: toEmail,
             subject: "Your nanoURL Verification Code",
@@ -42,13 +19,16 @@ export async function sendOTPEmail(toEmail, otpCode) {
           <p>This code will expire in <strong>5 minutes</strong>.</p>
         </div>
       `,
-        });
+        });
 
-        if (!process.env.SMTP_HOST) {
+        if (data.error) {
+            console.error("Resend error:", data.error);
+            return false;
         }
 
         return true;
-    } catch (error) {
+    } catch (error) {
+        console.error("Error sending OTP email:", error);
         return false;
     }
 }

@@ -79,8 +79,5 @@ Defined with **Drizzle ORM** for PostgreSQL:
    - `DATABASE_URL`: Your PostgreSQL connection string.
    - `JWT_SECRET`: Random secure string.
    - `CORS_ORIGIN`: Your frontend URL.
-   - `SMTP_HOST` : smtp.gmail.com
-   - `SMTP_PORT` : 587
-   - `SMTP_USER` : abc@gmail.com
-   - `SMTP_PASS` : Enter SMTP Password
-   - `SMTP_FROM` : nanoURL Security
+   - `RESEND_API_KEY`: Your Resend API Key.
+   - `RESEND_FROM_EMAIL`: The email address used to send verification emails (e.g., "nanoURL Security <onboarding@resend.dev>").
