@@ -18,7 +18,7 @@ nanoURL is a sleek, full-stack URL shortening platform built for speed, security
 
 ## Tech Stack
 
-| Category           | Technology                                     |
+| Category           | Tech Stacks                                    |
 | ------------------ | ---------------------------------------------- |
 | Frontend           | React, Vite, Tailwind CSS, React Router, Axios, React QR Code |
 | Backend            | Node.js, Express.js, PostgreSQL, Drizzle ORM   |
