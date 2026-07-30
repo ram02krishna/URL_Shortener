@@ -1,4 +1,4 @@
-# nanoURL - A Full-Stack URL Shortener
+## nanoURL - A Full-Stack URL Shortener
 
 nanoURL is a sleek, full-stack URL shortening platform built for speed, security, and simplicity. Developed with a modern React frontend and a robust Node.js/Express backend, it offers a seamless way to create, manage, and track shortened links. Whether you're a casual user looking for a quick shorten or a power user needing detailed analytics, nanoURL provides a polished, responsive experience on any device.
 
